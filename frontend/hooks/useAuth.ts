@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { api } from '../lib/api';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

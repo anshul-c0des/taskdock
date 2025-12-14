@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../../../hooks/useAuth';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const registerSchema = z.object({
   name: z.string().min(1),
@@ -16,13 +17,18 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const { registerUser, loading } = useAuth();
+  const router = useRouter();
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
 
   const onSubmit = async (data: RegisterForm) => {
     const res = await registerUser(data);
-    if (res) toast.success('Registered!');
+    if (res) {
+      toast.success('Registered!');
+      router.push('/dashboard');
+    }
   };
 
   return (

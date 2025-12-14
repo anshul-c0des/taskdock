@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '../../../hooks/useAuth';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -15,13 +16,18 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { registerUser, loginUser, loading } = useAuth();
+  const router = useRouter();
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginForm) => {
     const res = await loginUser(data);
-    if (res) toast.success('Logged in!');
+    if (res) {
+      toast.success('Logged In!');
+      router.push('/dashboard');
+    }
   };
 
   return (
