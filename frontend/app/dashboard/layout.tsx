@@ -1,21 +1,33 @@
-import { ReactNode } from "react";
+"use client"
+
+import { ReactNode, useEffect } from "react";
 import MobileNav from "@/components/layout/MobileNav";
 import Header from "@/components/layout/Header";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { registerSocketHandlers } from "@/lib/socketHandler";
+import { useAuth } from "@/hooks/useAuth";
+import { connectSocket } from "@/lib/socket";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
 
-  const cookieStore = await cookies(); 
-  const token = cookieStore.get('token')?.value;
+  const { user, isInitializing } = useAuth();
+  const router = useRouter();
 
-  if (!token) {
-    redirect('/auth/login');
-  }
+  useEffect(() => {
+    if (!isInitializing && !user) {
+      router.push('/auth/login');
+    } else if(user) {
+      connectSocket(user.id);
+      registerSocketHandlers(user.id);
+    }
+  }, [user, router, isInitializing]);
+
+  if (isInitializing || !user) return null;
+
 
   return (
     <div className="min-h-screen bg-background">

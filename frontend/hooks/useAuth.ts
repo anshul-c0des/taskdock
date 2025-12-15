@@ -12,6 +12,7 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -20,10 +21,13 @@ export const useAuth = () => {
         setUser(res.data.user);
       } catch {
         setUser(null);
+      } finally {
+        setIsInitializing(false);
       }
     };
     fetchUser();
   }, []);
+  
 
   const registerUser = async (data: { name: string; email: string; password: string }) => {
     setLoading(true);
@@ -63,5 +67,5 @@ export const useAuth = () => {
     }
   };
 
-  return { user, registerUser, loginUser, logoutUser, loading, error };
+  return { user, registerUser, loginUser, logoutUser, loading, error, isInitializing };
 };

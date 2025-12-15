@@ -8,3 +8,8 @@ export function getSocket() {
   }
   return socket;
 }
+
+export function connectSocket(userId: string) {
+  const socket = getSocket();
+  socket.emit("join", userId);
+}

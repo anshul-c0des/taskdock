@@ -25,3 +25,31 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     next(err);
   }
 };
+
+export const searchUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { search } = req.query;
+
+    if (!search || typeof search !== "string" || search.trim().length < 2) {
+      return res.status(400).json({ users: [], message: "Search query must be at least 2 characters" });
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      take: 10, // limit to 10 results
+    });
+
+    res.status(200).json({ users });
+  } catch (err) {
+    next(err);
+  }
+};

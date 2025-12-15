@@ -9,6 +9,7 @@ import {
   TaskCreateInput,
   TaskUpdateInput,
 } from "@/lib/taskApi";
+import toast from "react-hot-toast";
 
 export function useTasks() {
     return useQuery<Task[]>({
@@ -28,7 +29,9 @@ export function useTasks() {
     const queryClient = useQueryClient();
     return useMutation({
       mutationFn: (data: TaskCreateInput) => createTask(data),
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+      onSuccess: () => {queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    toast.success("Task created!")},
+    onError: () => {toast.error("Failed to create task")}
     });
   }
   
@@ -52,7 +55,9 @@ export function useTasks() {
         if (context?.previous) {
           queryClient.setQueryData(["tasks"], context.previous);
         }
+        toast.error("Update failed")
       },
+      onSuccess: () => {toast.success("Task updated")},
       onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
     });
   }
@@ -61,7 +66,9 @@ export function useTasks() {
     const queryClient = useQueryClient();
     return useMutation({
       mutationFn: (taskId: string) => deleteTask(taskId),
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+      onSuccess: () => {queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+    toast.success("Task deleted")},
+    onError: ()=>{toast.error("Delete failed")}
     });
   }
   
