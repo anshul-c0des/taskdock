@@ -16,8 +16,8 @@ export default function CreateTaskPage() {
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      priority: "MEDIUM", // default priority
-      status: "PENDING",  // always PENDING on create
+      priority: "MEDIUM", 
+      status: "PENDING", 
     },
   });
 
@@ -31,8 +31,6 @@ export default function CreateTaskPage() {
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : "",
     };
-  
-    if (!payload.assignedToId) payload.assignedToId = user?.id;
   
     createTaskMutation.mutate(payload);
   
@@ -58,7 +56,6 @@ export default function CreateTaskPage() {
         <Input placeholder="Description" {...form.register("description")} />
         <Input type="date" {...form.register("dueDate")} />
 
-        {/* Priority Select */}
         <Select
           value={form.watch("priority")}
           onValueChange={(value) => form.setValue("priority", value as "LOW" | "MEDIUM" | "HIGH")}
@@ -73,7 +70,6 @@ export default function CreateTaskPage() {
           </SelectContent>
         </Select>
 
-        {/* Assigned User Search */}
         <div className="relative">
           <Input
             placeholder="Assign to user (optional)"
