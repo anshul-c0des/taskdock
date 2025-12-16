@@ -84,9 +84,9 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    io.to(user.id).emit('task:updated', task);
+    io.to(user.id).emit('task:updated', updatedTask);
 
-    if(assignedToId) io.to(assignedToId).emit('task:updated', task);
+    if(assignedToId) io.to(assignedToId).emit('task:updated', updateTask);
 
     res.status(200).json({ task: updatedTask });
   } catch (err) {
