@@ -3,54 +3,72 @@ import { getSocket } from "./socket";
 import { Task } from "@/lib/taskApi";
 import { QueryClient } from "@tanstack/react-query";
 
-export function registerSocketHandlers(userId: string) {
+function isUserInvolved(task: Task, userId: string) {
+  const isCreator = task.createdById === userId;
+  const isAssignee = task.assignedToId === userId;
+  return { isCreator, isAssignee };
+}
+
+export function registerSocketHandlers(userId: string, queryClient: QueryClient) {
   const socket = getSocket();
-  const queryClient = new QueryClient();
+  if (!socket) return;
 
-  // 🚨 Prevent duplicate listeners
-  socket.off("task:created");
-  socket.off("task:assigned");
-  socket.off("task:updated");
-  socket.off("task:deleted");
+  const qc = queryClient;
 
-  // ➕ Task created
+  ["task:created", "task:assigned", "task:updated", "task:deleted"].forEach(event =>
+    socket.off(event)
+  );
+
+  const updateTaskList = (task: Task, updater: (old: Task[]) => Task[]) => {
+    if (!task || !task.id) {
+      console.warn("Received invalid task payload:", task);
+      return;
+    }
+    qc.setQueryData<Task[]>(["tasks"], old => updater(old || []));
+  };
+
   socket.on("task:created", (task: Task) => {
-    queryClient.setQueryData<Task[]>(["tasks"], (old = []) => {
-      // avoid duplicates
-      if (old.some(t => t.id === task.id)) return old;
+    updateTaskList(task, old => {
+      const { isCreator, isAssignee } = isUserInvolved(task, userId);
+      if (!isCreator && !isAssignee) return old;
+      if (old.some(t => t?.id === task?.id)) return old;
+      if (isAssignee && !isCreator) {
+        toast.success(`You were assigned a new task: ${task.title}`);
+      }
       return [task, ...old];
     });
-
-    toast.success(`Task created: ${task.title}`);
   });
 
-  // 👤 Task assigned to you
   socket.on("task:assigned", (task: Task) => {
-    if (task.assignedTo?.id !== userId) return;
-
-    queryClient.setQueryData<Task[]>(["tasks"], (old = []) => {
-      if (old.some(t => t.id === task.id)) return old;
+    if (!task || task.assignedToId !== userId) return;
+    updateTaskList(task, old => {
+      if (old.some(t => t?.id === task?.id)) return old;
+      toast.success(`You were assigned: ${task.title}`);
       return [task, ...old];
     });
-
-    toast.success(`You were assigned: ${task.title}`);
   });
 
-  // ✏️ Task updated
   socket.on("task:updated", (task: Task) => {
-    queryClient.setQueryData<Task[]>(["tasks"], (old = []) =>
-      old.map(t => (t.id === task.id ? task : t))
-    );
-
-    toast(`Task updated: ${task.title}`, { icon: "✏️" });
+    updateTaskList(task, old => {
+      const { isCreator, isAssignee } = isUserInvolved(task, userId);
+      if (!isCreator && !isAssignee) return old;
+      const updated = old.map(t => (t?.id === task?.id ? task : t));
+      if (isAssignee && !isCreator) {
+        toast(`Task updated: ${task.title}`, { icon: "✏️" });
+      }
+      return updated;
+    });
   });
 
-  // 🗑️ Task deleted
   socket.on("task:deleted", (task: Task) => {
-    queryClient.setQueryData<Task[]>(["tasks"], (old = []) =>
-      old.filter(t => t.id !== task.id)
-    );
-
-    toast(`Task deleted: ${task.title}`, { icon: "🗑️" });
+    updateTaskList(task, old => {
+      const { isCreator, isAssignee } = isUserInvolved(task, userId);
+      if (!isCreator && !isAssignee) return old;
+      const filtered = old.filter(t => t?.id !== task?.id);
+      if (isAssignee || !isCreator) {
+        toast(`Task deleted: ${task.title}`, { icon: "🗑️" });
+      }
+      return filtered;
+    });
   });
 }

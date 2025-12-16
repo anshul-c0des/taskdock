@@ -20,8 +20,8 @@ export interface Task {
   description?: string;
   dueDate: string;
   status: "OPEN" | "IN_PROGRESS" | "DONE";
-  assignedTo?: { id: string; name: string };
-  createdBy: { id: string; name: string };
+  assignedToId?: string | null;
+  createdById: string;
   createdAt: string;
   updatedAt: string;
 }

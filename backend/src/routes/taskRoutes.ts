@@ -13,9 +13,9 @@ const router = Router();
 router.use(requireAuth);
 
 router.post('/', createTask);
-router.get('/', getTasks);
-router.get('/:id', getTaskById);
-router.put('/:id', updateTask);
-router.delete('/:id', deleteTask);
+router.get('/', requireAuth, getTasks);
+router.get('/:id', requireAuth, getTaskById);
+router.put('/:id', requireAuth, updateTask);
+router.delete('/:id', requireAuth, deleteTask);
 
 export default router;

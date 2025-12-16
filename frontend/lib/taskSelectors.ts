@@ -14,11 +14,11 @@ export function selectTasks({
   let result = [...tasks];
 
   if (tab === "assigned") {
-    result = result.filter((t) => t.assignedTo?.id === userId);
+    result = result.filter((t) => t.assignedToId === userId);
   }
 
   if (tab === "created") {
-    result = result.filter((t) => t.createdBy.id === userId);
+    result = result.filter((t) => t.createdById === userId);
   }
 
   if (tab === "overdue") {

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { registerSocketHandlers } from "@/lib/socketHandler";
 import { useAuth } from "@/hooks/useAuth";
 import { connectSocket } from "@/lib/socket";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function DashboardLayout({
   children,
@@ -16,15 +17,16 @@ export default function DashboardLayout({
 
   const { user, isInitializing } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!isInitializing && !user) {
       router.push('/auth/login');
     } else if(user) {
       connectSocket(user.id);
-      registerSocketHandlers(user.id);
+      registerSocketHandlers(user.id, queryClient);
     }
-  }, [user, router, isInitializing]);
+  }, [user, router, isInitializing, queryClient]);
 
   if (isInitializing || !user) return null;
 

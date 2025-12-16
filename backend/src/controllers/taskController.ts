@@ -30,37 +30,60 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
 
 export const getTasks = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const user = (req as any).user;
+
     const tasks = await prisma.task.findMany({
+      where: {
+        OR: [
+          { createdById: user.id },
+          { assignedToId: user.id },
+        ],
+      },
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
         assignedTo: { select: { id: true, name: true, email: true } },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
+
     res.status(200).json({ tasks });
   } catch (err) {
     next(err);
   }
 };
 
+
 export const getTaskById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const user = (req as any).user;
     const { id } = req.params;
 
-    const task = await prisma.task.findUnique({
-      where: { id },
+    const task = await prisma.task.findFirst({
+      where: {
+        id,
+        OR: [
+          { createdById: user.id },
+          { assignedToId: user.id },
+        ],
+      },
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
         assignedTo: { select: { id: true, name: true, email: true } },
       },
     });
 
-    if (!task) return res.status(404).json({ message: 'Task not found' });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
     res.status(200).json({ task });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const updateTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -86,7 +109,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
 
     io.to(user.id).emit('task:updated', updatedTask);
 
-    if(assignedToId) io.to(assignedToId).emit('task:updated', updateTask);
+    if(assignedToId) io.to(assignedToId).emit('task:updated', updatedTask);
 
     res.status(200).json({ task: updatedTask });
   } catch (err) {
@@ -107,7 +130,7 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
 
     io.to(user.id).emit('task:deleted', task);
 
-    if(assignedToId) io.to(assignedToId).emit('task:assigned', task);
+    if(assignedToId) io.to(assignedToId).emit('task:deleted', task);
 
     res.status(200).json({ message: 'Task deleted' });
   } catch (err) {
