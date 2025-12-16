@@ -5,30 +5,50 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskFormValues } from "@/schema/taskSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCreateTask } from "@/hooks/useTasks";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserSearch } from "@/hooks/useUser";
+import { useCreateTask } from "@/hooks/useTasks";
 
 export default function CreateTaskPage() {
   const { user } = useAuth();
-  const form = useForm<TaskFormValues>({ resolver: zodResolver(taskSchema) });
-  const createTaskMutation = useCreateTask();
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      priority: "MEDIUM", // default priority
+      status: "PENDING",  // always PENDING on create
+    },
+  });
 
+  const createTaskMutation = useCreateTask();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const { users, loading: usersLoading } = useUserSearch(searchQuery);
 
   const onSubmit = (data: TaskFormValues) => {
-    // If assignedToUserId is blank, use current user
-    if (!data.assignedToId) {
-      data.assignedToId = user?.id;
-    }
-    createTaskMutation.mutate(data);
-    form.reset();
+    const payload = {
+      ...data,
+      dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : "",
+    };
+  
+    if (!payload.assignedToId) payload.assignedToId = user?.id;
+  
+    createTaskMutation.mutate(payload);
+  
+    form.reset({
+      title: "",
+      description: "",
+      dueDate: "",
+      priority: "MEDIUM",
+      status: "PENDING",
+      assignedToId: undefined,
+    });
+  
     setSelectedUserId(undefined);
     setSearchQuery("");
   };
+  
 
   return (
     <div>
@@ -38,6 +58,22 @@ export default function CreateTaskPage() {
         <Input placeholder="Description" {...form.register("description")} />
         <Input type="date" {...form.register("dueDate")} />
 
+        {/* Priority Select */}
+        <Select
+          value={form.watch("priority")}
+          onValueChange={(value) => form.setValue("priority", value as "LOW" | "MEDIUM" | "HIGH")}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="LOW">Low</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Assigned User Search */}
         <div className="relative">
           <Input
             placeholder="Assign to user (optional)"
@@ -51,14 +87,14 @@ export default function CreateTaskPage() {
               ) : users.length === 0 ? (
                 <li className="p-2 text-gray-500">No users found</li>
               ) : (
-                users.map(u => (
+                users.map((u) => (
                   <li
                     key={u.id}
                     className="p-2 hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
                       setSelectedUserId(u.id);
                       setSearchQuery(u.name);
-                      form.setValue("assignedToId", u.id);
+                      form.setValue("assignedToId", u.id ?? undefined);
                     }}
                   >
                     {u.name}

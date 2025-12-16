@@ -4,14 +4,24 @@ export interface TaskCreateInput {
   title: string;
   description?: string;
   dueDate: string;
+  priority?: "LOW" | "MEDIUM" | "HIGH";
+  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  assignedToId?: string;
 }
 
 export interface TaskUpdateInput {
   title?: string;
   description?: string;
   dueDate?: string;
-  status?: "OPEN" | "IN_PROGRESS" | "DONE";
+  priority?: "LOW" | "MEDIUM" | "HIGH";
+  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email?: string;
 }
 
 export interface Task {
@@ -19,9 +29,12 @@ export interface Task {
   title: string;
   description?: string;
   dueDate: string;
-  status: "OPEN" | "IN_PROGRESS" | "DONE";
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string | null;
   createdById: string;
+  assignedTo?: User | null;
+  createdBy: User;
   createdAt: string;
   updatedAt: string;
 }

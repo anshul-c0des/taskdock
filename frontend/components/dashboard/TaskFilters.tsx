@@ -14,9 +14,9 @@ export function TaskFilters({ onChange }: Props) {
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="OPEN">Open</SelectItem>
+          <SelectItem value="PENDING">Pending</SelectItem>
           <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-          <SelectItem value="DONE">Done</SelectItem>
+          <SelectItem value="COMPLETED">Completed</SelectItem>
         </SelectContent>
       </Select>
 

@@ -26,7 +26,7 @@ export function selectTasks({
     result = result.filter(
       (t) =>
         new Date(t.dueDate) < now &&
-        t.status !== "DONE"
+        t.status !== "COMPLETED"
     );
   }
 
