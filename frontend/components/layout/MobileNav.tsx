@@ -11,7 +11,7 @@ export default function MobileNav() {
   const navItems = [
     {
       label: "Tasks",
-      href: "/",
+      href: "/dashboard",
       icon: ListTodo,
     },
     {
