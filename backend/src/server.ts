@@ -1,17 +1,11 @@
 import { createServer } from 'http';
 import { app } from './app';
-import { Server } from 'socket.io';
+import { initSocket } from './lib/socket';
 
 const PORT = process.env.PORT || 4000;
 const httpServer = createServer(app);
 
-export const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST'],
-    credentials: true,
-  }
-})
+export const io = initSocket(httpServer);
 
 io.on('connection', (socket)=> {
   console.log(`User connected: ${socket.id}`);

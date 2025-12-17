@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma';
-import { io } from '../server';
+import { io } from '../lib/socket';
+import { assignTask } from '../services/taskService';
 
 export const createTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -157,6 +158,24 @@ export const deleteTask = async (req: Request, res: Response, next: NextFunction
     if(assignedToId) io.to(assignedToId).emit('task:deleted', task);
 
     res.status(200).json({ message: 'Task deleted' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const assignTaskController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { taskId } = req.params;
+    const { assignedToId } = req.body;
+
+    // Update the task assignment
+    const updatedTask = await assignTask(taskId, assignedToId);
+
+    // Emit socket notification
+    io.to(assignedToId).emit("task:assigned", updatedTask);
+
+    res.status(200).json({ task: updatedTask });
   } catch (err) {
     next(err);
   }
