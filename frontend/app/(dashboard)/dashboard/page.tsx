@@ -9,7 +9,7 @@ import { selectTasks } from "@/lib/taskSelectors";
 import { useAuth } from "@/hooks/useAuth";
 
 type Filters = {
-  status?: "OPEN" | "IN_PROGRESS" | "DONE";
+  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   sort?: "due_asc" | "due_desc";
 };
 
