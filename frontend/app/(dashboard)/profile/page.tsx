@@ -12,9 +12,9 @@ export default function ProfilePage() {
   if (isLoading) return <p>Loading tasks...</p>;
 
   // Task stats
-  const pending = tasks.filter((t) => t.assignedTo?.id === user.id && t.status === "PENDING").length;
-  const inProgress = tasks.filter((t) => t.assignedTo?.id === user.id && t.status === "IN_PROGRESS").length;
-  const completed = tasks.filter((t) => t.assignedTo?.id === user.id && t.status === "COMPLETED").length;
+  const pending = tasks.filter((t) => (t.assignedTo?.id === user.id || t.createdBy.id===user.id) && t.status === "PENDING").length;
+  const inProgress = tasks.filter((t) => (t.assignedTo?.id === user.id || t.createdBy.id===user.id) && t.status === "IN_PROGRESS").length;
+  const completed = tasks.filter((t) => (t.assignedTo?.id === user.id || t.createdBy.id===user.id) && t.status === "COMPLETED").length;
 
   // Recent 5 tasks (assigned or created by user)
   const recentTasks = tasks

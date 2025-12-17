@@ -9,10 +9,10 @@ import { selectTasks } from "@/lib/taskSelectors";
 import { useAuth } from "@/hooks/useAuth";
 
 type Filters = {
-  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "ALL";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "ALL";
   sort?: "due_asc" | "due_desc";
 };
-
 
 export default function DashboardPage() {
   const { data: tasks = [], isLoading } = useTasks();

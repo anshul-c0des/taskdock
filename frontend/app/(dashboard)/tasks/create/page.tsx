@@ -6,13 +6,14 @@ import { taskSchema, TaskFormValues } from "@/schema/taskSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserSearch } from "@/hooks/useUser";
 import { useCreateTask } from "@/hooks/useTasks";
+import { useRouter } from "next/navigation";
 
 export default function CreateTaskPage() {
-  const { user } = useAuth();
+  const { user, isInitializing } = useAuth();
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -26,6 +27,14 @@ export default function CreateTaskPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const { users, loading: usersLoading } = useUserSearch(searchQuery);
 
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user && !isInitializing) {
+      router.push("/auth/login");
+    }
+  }, [user, router]);
+
   const onSubmit = (data: TaskFormValues) => {
     const payload = {
       ...data,
@@ -33,6 +42,8 @@ export default function CreateTaskPage() {
     };
   
     createTaskMutation.mutate(payload);
+
+    router.push('/dashboard');
   
     form.reset({
       title: "",

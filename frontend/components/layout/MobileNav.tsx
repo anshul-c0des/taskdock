@@ -16,7 +16,7 @@ export default function MobileNav() {
     },
     {
       label: "Create",
-      href: "/create",
+      href: "/tasks/create",
       icon: Plus,
     },
     {

@@ -30,23 +30,23 @@ export function selectTasks({
     );
   }
 
-  if (filters.status) {
+  if (filters.status && filters.status !== "ALL") {
     result = result.filter((t) => t.status === filters.status);
+  }
+
+  if (filters.priority && filters.priority !== "ALL") {
+    result = result.filter((t) => t.priority === filters.priority);
   }
 
   if (filters.sort === "due_asc") {
     result.sort(
-      (a, b) =>
-        new Date(a.dueDate).getTime() -
-        new Date(b.dueDate).getTime()
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
     );
   }
 
   if (filters.sort === "due_desc") {
     result.sort(
-      (a, b) =>
-        new Date(b.dueDate).getTime() -
-        new Date(a.dueDate).getTime()
+      (a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
     );
   }
 

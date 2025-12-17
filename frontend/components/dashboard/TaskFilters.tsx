@@ -14,9 +14,22 @@ export function TaskFilters({ onChange }: Props) {
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="ALL">All</SelectItem>
           <SelectItem value="PENDING">Pending</SelectItem>
           <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
           <SelectItem value="COMPLETED">Completed</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select onValueChange={(value) => onChange({ priority: value })}>
+        <SelectTrigger className="w-[140px]">
+          <SelectValue placeholder="Priority" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ALL">All</SelectItem>
+          <SelectItem value="LOW">Low</SelectItem>
+          <SelectItem value="MEDIUM">Medium</SelectItem>
+          <SelectItem value="HIGH">High</SelectItem>
         </SelectContent>
       </Select>
 

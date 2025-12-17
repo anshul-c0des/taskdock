@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { useTask, useUpdateTask } from "@/hooks/useTasks";
+import { useParams, useRouter } from "next/navigation";
+import { useDeleteTask, useTask, useUpdateTask } from "@/hooks/useTasks";
 import { Button } from "@/components/ui/button";
 import { getSocket } from "@/lib/socket";
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,11 @@ export default function TaskDetailsPage() {
   const params = useParams();
   const taskId = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId;
 
+  const router = useRouter();
+
   const { data: task, isLoading, isError, refetch } = useTask(taskId!);
   const updateTaskMutation = useUpdateTask();
+  const deleteTaskMutation = useDeleteTask();
 
   const [taskInput, setTaskInput] = useState<TaskUpdateInput>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,6 +71,16 @@ export default function TaskDetailsPage() {
       taskId: task!.id,
       data: taskInput,
     });
+    router.push('/dashboard');
+  };
+  
+  const handleDelete = () => {
+    if (!taskId) {
+      console.error("No taskId found, cannot delete task");
+      return;
+    }
+    deleteTaskMutation.mutate(taskId);
+    router.push('/dashboard');
   };
 
   return (
@@ -173,6 +186,9 @@ export default function TaskDetailsPage() {
       <div className="flex gap-2 mt-4">
         <Button onClick={handleUpdate} disabled={updateTaskMutation.isPending}>
           {updateTaskMutation.isPending ? "Saving..." : "Save Changes"}
+        </Button>
+        <Button onClick={handleDelete} variant="destructive" disabled={updateTaskMutation.isPending}>
+          {deleteTaskMutation.isPending ? "Deleting..." : "Delete Task"}
         </Button>
       </div>
     </div>
