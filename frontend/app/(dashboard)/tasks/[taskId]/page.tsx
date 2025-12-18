@@ -1,52 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useDeleteTask, useTask, useUpdateTask } from "@/hooks/useTasks";
-import { Button } from "@/components/ui/button";
 import { getSocket } from "@/lib/socket";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Task, TaskUpdateInput, User } from "@/lib/taskApi";
-import { useUserSearch } from "@/hooks/useUser";
+import { Task, TaskUpdateInput } from "@/lib/taskApi";
+import { TaskForm } from "@/components/tasks/TaskForm";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { TaskFormValues } from "@/schema/taskSchema";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export default function TaskDetailsPage() {
   const params = useParams();
   const taskId = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId;
 
+  const { user } = useAuth();
   const router = useRouter();
-
+  
   const { data: task, isLoading, isError, refetch } = useTask(taskId!);
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
-
-  const [taskInput, setTaskInput] = useState<TaskUpdateInput>({});
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  const { users, loading: usersLoading } = useUserSearch(searchQuery);
-
-  useEffect(() => {
-    if (task) {
-      setTaskInput({
-        title: task.title,
-        description: task.description || "",
-        status: task.status,
-        priority: task.priority,
-        dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "",
-        assignedToId: task.assignedToId || undefined,
-      });
-      if (task.assignedTo) setSelectedUser(task.assignedTo);
-    }
-  }, [task]);
 
   useEffect(() => {
     const socket = getSocket();
@@ -59,138 +35,105 @@ export default function TaskDetailsPage() {
     };
   }, [taskId, refetch]);
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p className="text-destructive">Failed to load task.</p>;
-
-  const handleChange = <K extends keyof TaskUpdateInput>(key: K, value: TaskUpdateInput[K]) => {
-    setTaskInput((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleUpdate = () => {
-    updateTaskMutation.mutate({
-      taskId: task!.id,
-      data: taskInput,
-    });
-    router.push('/dashboard');
+  const handleUpdate = (data: TaskFormValues) => {
+    const updateData: TaskUpdateInput = {
+      title: data.title,
+      description: data.description,
+      dueDate: data.dueDate,
+      priority: data.priority,
+      status: data.status,
+      assignedToId: data.assignedToId,
+    };
+  
+    updateTaskMutation.mutate(
+      { taskId: task!.id, data: updateData },
+      {
+        onSuccess: () => {
+          toast.success("Task updated successfully");
+          router.push("/dashboard");
+        },
+        onError: () => toast.error("Failed to update task")
+      }
+    );
   };
   
   const handleDelete = () => {
-    if (!taskId) {
-      console.error("No taskId found, cannot delete task");
-      return;
-    }
-    deleteTaskMutation.mutate(taskId);
-    router.push('/dashboard');
+    if (!taskId) return;
+    deleteTaskMutation.mutate(taskId, {
+      onSuccess: () => {
+        toast.success("Task deleted");
+        router.push('/dashboard');
+      },
+      onError: () => toast.error("Failed to delete task")
+    });
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <p className="text-slate-500 text-sm font-medium">Fetching task details...</p>
+      </div>
+    );
+  }
+
+  if (isError || !task) {
+    return (
+      <div className="max-w-xl mx-auto mt-10 p-8 border-2 border-dashed border-slate-200 rounded-2xl text-center">
+        <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-4" />
+        <h3 className="text-lg font-bold text-slate-900">Task not found</h3>
+        <p className="text-slate-500 mb-6">This task may have been deleted or moved.</p>
+        <Button onClick={() => router.push("/dashboard")} variant="outline">
+          Back to Dashboard
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-xl">
+    <div className="w-full max-w-2xl mx-auto px-4 py-6 sm:py-10">
+      <button 
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors mb-6 group"
+      >
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
 
-      <div>
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={taskInput.title || ""}
-          onChange={(e) => handleChange("title", e.target.value)}
-        />
-      </div>
+      <Card className="border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
+        <CardHeader className="pt-8 pb-2 px-8">
+          <CardTitle className="text-2xl font-bold text-slate-900 tracking-tight">
+            Task Details
+          </CardTitle>
+          <p className="text-sm text-slate-500 mt-1">
+            View or modify task parameters and status.
+          </p>
+        </CardHeader>
 
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={taskInput.description || ""}
-          onChange={(e) => handleChange("description", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="status">Status</Label>
-        <Select
-          value={taskInput.status || "PENDING"}
-          onValueChange={(val) => handleChange("status", val as TaskUpdateInput["status"])}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PENDING">Pending</SelectItem>
-            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-            <SelectItem value="COMPLETED">Completed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="priority">Priority</Label>
-        <Select
-          value={taskInput.priority || "MEDIUM"}
-          onValueChange={(val) => handleChange("priority", val as TaskUpdateInput["priority"])}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="LOW">Low</SelectItem>
-            <SelectItem value="MEDIUM">Medium</SelectItem>
-            <SelectItem value="HIGH">High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="dueDate">Due Date</Label>
-        <Input
-          type="date"
-          id="dueDate"
-          value={taskInput.dueDate || ""}
-          onChange={(e) => handleChange("dueDate", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="assignedTo">Assigned To</Label>
-        <Input
-          placeholder="Search user..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery.length >= 2 && (
-          <ul className="absolute bg-white border mt-1 w-full max-h-48 overflow-y-auto z-10">
-            {usersLoading ? (
-              <li className="p-2 text-gray-500">Loading...</li>
-            ) : users.length === 0 ? (
-              <li className="p-2 text-gray-500">No users found</li>
-            ) : (
-              users.map((u) => (
-                <li
-                  key={u.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    setSelectedUser(u);
-                    setSearchQuery(u.name);
-                    handleChange("assignedToId", u.id);
-                  }}
-                >
-                  {u.name}
-                </li>
-              ))
-            )}
-          </ul>
-        )}
-        {selectedUser && (
-          <p className="text-sm mt-1">Assigned: {selectedUser.name}</p>
-        )}
-      </div>
-
-      <div className="flex gap-2 mt-4">
-        <Button onClick={handleUpdate} disabled={updateTaskMutation.isPending}>
-          {updateTaskMutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
-        <Button onClick={handleDelete} variant="destructive" disabled={updateTaskMutation.isPending}>
-          {deleteTaskMutation.isPending ? "Deleting..." : "Delete Task"}
-        </Button>
-      </div>
+        <CardContent className="px-8 pb-8 pt-4">
+          <TaskForm
+            initialValues={{
+              title: task?.title || "",
+              description: task?.description || "",
+              dueDate: task?.dueDate ? task.dueDate.split("T")[0] : "",
+              priority: task?.priority || "MEDIUM",
+              status: task?.status || "PENDING",
+              assignedToId: task?.assignedToId || undefined,
+              assignedUser: task?.assignedTo?.name || "",
+            }}
+            taskMeta={{
+              createdById: task.createdById,
+              assignedToId: task.assignedToId ?? undefined,
+            }}
+            currentUserId={user?.id}
+            onSubmit={handleUpdate}
+            onDelete={handleDelete}
+            submitLabel="Save Changes"
+            deleteLabel="Delete Task"
+            isSubmitting={updateTaskMutation.isPending}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

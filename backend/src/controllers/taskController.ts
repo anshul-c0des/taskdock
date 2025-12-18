@@ -13,7 +13,9 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
         title,
         description,
         priority,
-        dueDate: dueDate ? new Date(dueDate) : null,
+        dueDate: dueDate
+        ? new Date(`${dueDate}T00:00:00.000Z`)
+        : null,
         createdById: user.id,
         assignedToId: assignedToId || null,
       },

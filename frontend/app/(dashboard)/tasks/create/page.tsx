@@ -1,121 +1,75 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { taskSchema, TaskFormValues } from "@/schema/taskSchema";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { TaskFormValues } from "@/schema/taskSchema";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserSearch } from "@/hooks/useUser";
 import { useCreateTask } from "@/hooks/useTasks";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { TaskForm } from "@/components/tasks/TaskForm";
+import { ArrowLeft } from "lucide-react";
 
 export default function CreateTaskPage() {
   const { user, isInitializing } = useAuth();
-  const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskSchema),
-    defaultValues: {
-      priority: "MEDIUM", 
-      status: "PENDING", 
-    },
-  });
-
-  const createTaskMutation = useCreateTask();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
-  const { users, loading: usersLoading } = useUserSearch(searchQuery);
-
   const router = useRouter();
+  const createTaskMutation = useCreateTask();
 
   useEffect(() => {
     if (!user && !isInitializing) {
       router.push("/auth/login");
     }
-  }, [user, router]);
+  }, [user, isInitializing, router]);
 
   const onSubmit = (data: TaskFormValues) => {
     const payload = {
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : "",
     };
-  
-    createTaskMutation.mutate(payload);
 
-    router.push('/dashboard');
-  
-    form.reset({
-      title: "",
-      description: "",
-      dueDate: "",
-      priority: "MEDIUM",
-      status: "PENDING",
-      assignedToId: undefined,
+    createTaskMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("Task created successfully!");
+        router.push("/dashboard");
+      }, 
+      onError: (error: any) => {
+        const message = error?.response?.data?.message || "Failed to create task.";
+        toast.error(message);
+      },
     });
-  
-    setSelectedUserId(undefined);
-    setSearchQuery("");
   };
-  
+
+  if (isInitializing) return null;
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold mb-4">Create Task</h1>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <Input placeholder="Title" {...form.register("title")} />
-        <Input placeholder="Description" {...form.register("description")} />
-        <Input type="date" {...form.register("dueDate")} />
-
-        <Select
-          value={form.watch("priority")}
-          onValueChange={(value) => form.setValue("priority", value as "LOW" | "MEDIUM" | "HIGH")}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="LOW">Low</SelectItem>
-            <SelectItem value="MEDIUM">Medium</SelectItem>
-            <SelectItem value="HIGH">High</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <div className="relative">
-          <Input
-            placeholder="Assign to user (optional)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+    <div className="w-full max-w-2xl mx-auto px-4 py-6 sm:py-10">
+       <button 
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors mb-6 group"
+      >
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
+      <Card className="border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
+        <CardHeader className="pt-8 pb-2 px-8">
+          <CardTitle className="text-2xl font-bold text-slate-900 tracking-tight">
+            Create New Task
+          </CardTitle>
+          <p className="text-sm text-slate-500 mt-1">
+            Assign tasks to team members and set clear deadlines.
+          </p>
+        </CardHeader>
+        
+        <CardContent className="px-8 pb-8 pt-4">
+          <TaskForm 
+            onSubmit={onSubmit} 
+            submitLabel="Create Task" 
+            isSubmitting={createTaskMutation.isPending}
+            currentUserId={user?.id}
+            taskMeta={{ createdById: user?.id || "" }}
           />
-          {searchQuery.length >= 2 && (
-            <ul className="absolute bg-white border mt-1 w-full max-h-48 overflow-y-auto z-10">
-              {usersLoading ? (
-                <li className="p-2 text-gray-500">Loading...</li>
-              ) : users.length === 0 ? (
-                <li className="p-2 text-gray-500">No users found</li>
-              ) : (
-                users.map((u) => (
-                  <li
-                    key={u.id}
-                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setSelectedUserId(u.id);
-                      setSearchQuery(u.name);
-                      form.setValue("assignedToId", u.id ?? undefined);
-                    }}
-                  >
-                    {u.name}
-                  </li>
-                ))
-              )}
-            </ul>
-          )}
-        </div>
-
-        <Button type="submit" disabled={createTaskMutation.isPending}>
-          {createTaskMutation.isPending ? "Creating..." : "Create"}
-        </Button>
-      </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

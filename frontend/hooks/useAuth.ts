@@ -52,6 +52,7 @@ export const useAuth = () => {
       return res.data;
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
+      throw new Error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
