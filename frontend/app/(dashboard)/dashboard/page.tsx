@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTasks } from "@/hooks/useTasks";
-import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { TaskFilters } from "@/components/dashboard/TaskFilters";
 import { selectTasks } from "@/lib/taskSelectors";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { Calendar, Flag, User, Clock, ChevronRight, Inbox } from "lucide-react";
+import { Calendar, User, Clock, ChevronRight, Inbox } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 type Filters = {
   status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "ALL";
@@ -47,8 +47,12 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function DashboardPage() {
   const { data: tasks = [], isLoading } = useTasks();
   const { user, isInitializing } = useAuth();
-  const [tab, setTab] = useState<"assigned" | "created" | "overdue">("assigned");
   const [filters, setFilters] = useState<Filters>({});
+  const searchParams = useSearchParams();
+const tab = (searchParams.get("tab") ?? "assigned") as
+  | "assigned"
+  | "created"
+  | "overdue";
 
   if (isInitializing || !user) return null;
   const userId = user.id;
@@ -65,21 +69,16 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-          Welcome back, {user.name.split(" ")[0]} 👋
-        </h1>
-        <p className="text-slate-500 text-sm">
-          You have <span className="font-bold text-indigo-600">{visibleTasks.length} tasks</span> to review in this view.
-        </p>
-      </div>
 
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <DashboardTabs active={tab} onChange={setTab} />
-        </div>
         
         <TaskFilters onChange={(f) => setFilters({ ...filters, ...f })} />
+
+      <div className="flex items-center gap-2 px-1 pb-2">
+        <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+        <p className="text-slate-500 text-sm font-medium ml-2">
+        You have <span className="text-[#6366F1] font-bold">{visibleTasks.length} {tab} {visibleTasks.length===1? "task" : "tasks"}</span> to manage.</p>
+      </div>
 
         {visibleTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">

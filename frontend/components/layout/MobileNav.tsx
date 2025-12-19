@@ -10,7 +10,7 @@ export default function MobileNav() {
 
   const navItems = [
     {
-      label: "Board",
+      label: "DashBoard",
       href: "/dashboard",
       icon: LayoutDashboard,
     },
@@ -29,7 +29,6 @@ export default function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden">
-      {/* Glassmorphism Background Container */}
       <div className="bg-white/80 backdrop-blur-lg border-t border-slate-200/50 pb-safe shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.05)]">
         <ul className="flex items-center justify-around h-16">
           {navItems.map(({ href, icon: Icon, label, isPrimary }) => {

@@ -32,7 +32,7 @@ export default function TaskDetailsPage() {
 
     return () => {
       socket.off("task:updated");
-    };
+    }; 
   }, [taskId, refetch]);
 
   const handleUpdate = (data: TaskFormValues) => {
@@ -44,6 +44,8 @@ export default function TaskDetailsPage() {
       status: data.status,
       assignedToId: data.assignedToId,
     };
+
+    console.log("Sending update payload:", updateData);
   
     updateTaskMutation.mutate(
       { taskId: task!.id, data: updateData },

@@ -8,28 +8,44 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
     const user = (req as any).user;
     const { title, description, priority, dueDate, assignedToId } = req.body;
 
+    if (!title || typeof title !== "string") {
+      return res.status(400).json({ error: "Title is required and must be a string" });
+    }
+
+    const validPriorities = ["LOW", "MEDIUM", "HIGH"];
+    if (!priority || !validPriorities.includes(priority)) {
+      return res.status(400).json({ error: "Priority must be one of LOW, MEDIUM, HIGH" });
+    }
+
+    let parsedDueDate: Date | null = null;
+    if (dueDate && dueDate.trim() !== "") {
+      const d = new Date(dueDate);
+      if (isNaN(d.getTime())) {
+        return res.status(400).json({ error: "Invalid dueDate format" });
+      }
+      parsedDueDate = d;
+    }
     const task = await prisma.task.create({
       data: {
         title,
-        description,
+        description: description || "",
         priority,
-        dueDate: dueDate
-        ? new Date(`${dueDate}T00:00:00.000Z`)
-        : null,
+        dueDate: parsedDueDate,
         createdById: user.id,
         assignedToId: assignedToId || null,
       },
     });
 
-    io.to(user.id).emit('task:created', task);
-
-    if(assignedToId) io.to(assignedToId).emit('task:assigned', task);
+    // Emit socket events
+    io.to(user.id).emit("task:created", task);
+    if (assignedToId) io.to(assignedToId).emit("task:assigned", task);
 
     res.status(201).json({ task });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const getTasks = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -89,11 +105,9 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
 
 export const updateTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = (req as any).user; // authenticated user
+    const user = (req as any).user;
     const { id } = req.params;
     const { title, description, status, priority, dueDate, assignedToId } = req.body;
-
-    // Find the task
     const task = await prisma.task.findUnique({
       where: { id },
     });
@@ -107,11 +121,9 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Prepare update data
     const data: any = {};
 
     if (isCreator) {
-      // Creator can update all fields
       if (title !== undefined) data.title = title;
       if (description !== undefined) data.description = description;
       if (status !== undefined) data.status = status;
@@ -119,11 +131,10 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
       if (assignedToId !== undefined) data.assignedToId = assignedToId || null;
     } else if (isAssigned) {
-      // Assigned user can only update status
+      if (priority !== undefined) data.priority = priority;
       if (status !== undefined) data.status = status;
     }
 
-    // Update the task
     const updatedTask = await prisma.task.update({
       where: { id },
       data,
@@ -133,7 +144,6 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    // Notify users via socket
     io.to(task.createdById).emit("task:updated", updatedTask);
     if (updatedTask.assignedToId) io.to(updatedTask.assignedToId).emit("task:updated", updatedTask);
 

@@ -59,7 +59,7 @@ export async function updateTask(
   input: TaskUpdateInput
 ): Promise<Task> {
   const { data } = await api.patch(`/tasks/${taskId}`, input);
-  return data;
+  return data.task;
 }
 
 export async function deleteTask(taskId: string): Promise<void> {

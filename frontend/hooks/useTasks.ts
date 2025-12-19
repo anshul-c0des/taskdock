@@ -56,7 +56,7 @@ export function useTasks() {
     });
   }  
   
-  export function useUpdateTask() {
+  export function useUpdateTask() { 
     const queryClient = useQueryClient();
     return useMutation({
       mutationFn: ({ taskId, data }: { taskId: string; data: TaskUpdateInput }) =>
@@ -67,7 +67,11 @@ export function useTasks() {
         const previous = queryClient.getQueryData<Task[]>(["tasks"]);
   
         queryClient.setQueryData<Task[]>(["tasks"], (old) =>
-          old?.map((task) => (task.id === taskId ? { ...task, ...data } : task))
+          old?.map((task) => 
+            task.id === taskId
+              ? { ...task, ...Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined)) }
+              : task
+          )
         );
   
         return { previous };
