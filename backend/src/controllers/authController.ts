@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma';
 import { signToken } from '../utils/jwt';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, email, password } = req.body;
@@ -18,8 +20,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     const token = signToken({ userId: user.id });
 
-    res
-      .cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax' })
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        maxAge: 1000 * 60 * 60 * 24,
+      })
       .status(201)
       .json({ message: 'User registered', user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
