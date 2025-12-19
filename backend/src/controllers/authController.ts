@@ -45,8 +45,12 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     const token = signToken({ userId: user.id });
 
-    res
-      .cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax' })
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        maxAge: 1000 * 60 * 60 * 24,
+      })
       .status(200)
       .json({ message: 'Logged in', user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
