@@ -6,6 +6,11 @@ const config: Config = {
   clearMocks: true,
   setupFilesAfterEnv: ["<rootDir>/test/setup.ts"],
   moduleFileExtensions: ["ts", "js"],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.test.json'
+    }
+  },
   testMatch: ["**/*.test.ts"],
 };
 
