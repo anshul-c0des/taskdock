@@ -20,7 +20,7 @@ A full-stack, collaborative task management application with real-time updates, 
 
 ## Features
 
-- User authentication (JWT via HttpOnly cookies + bcypt)  
+- User authentication (JWT via HttpOnly cookies + bcrypt)  
 - User profiles  
 - Task creation, reading, updating, and deletion (CRUD)  
 - Assign tasks to other users  
@@ -28,6 +28,7 @@ A full-stack, collaborative task management application with real-time updates, 
 - Personal dashboards (created tasks, assigned tasks, overdue tasks)  
 - Filtering & sorting of tasks  
 - Mobile-first responsive design  
+- Optimistic UI
 
 ---
 
@@ -123,6 +124,20 @@ npm run dev
 ```
 
 App will be available at http://localhost:3000.
+
+### Docker Setup
+Build and run the containers:
+```bash
+docker-compose up --build
+```
+
+### Testing
+Critical backend logic (task creation, assignment, & socket) is covered with Jest unit tests.
+Run tests:
+```bash
+cd backend
+npm run test
+```
 
 ## API Documentation
 

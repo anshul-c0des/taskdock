@@ -49,7 +49,7 @@ export default function TaskDetailsPage() {
       { taskId: task!.id, data: updateData },
       {
         onSuccess: () => {
-          router.push("/dashboard");
+          router.push("/dashboard?tab=created");
           toast.success("Task updated successfully!");
         },
         onError: () => toast.error("Failed to update task")
@@ -59,7 +59,7 @@ export default function TaskDetailsPage() {
   
   const handleDelete = () => {
     if (!taskId) return;
-    router.push("/dashboard");
+    router.push("/dashboard?tab=created");
     deleteTaskMutation.mutate(taskId, {
       onSuccess: () => {
         toast.success("Task deleted");

@@ -20,9 +20,10 @@ type Filters = {
 const PriorityBadge = ({ priority }: { priority: string }) => {
   const styles =
     {
-      HIGH: "bg-red-50 text-red-600 border-red-100",
-      MEDIUM: "bg-amber-50 text-amber-600 border-amber-100",
+      HIGH: "bg-orange-50 text-orange-600 border-orange-100",
+      MEDIUM: "bg-yellow-50 text-yellow-600 border-yellow-100",
       LOW: "bg-emerald-50 text-emerald-600 border-emerald-100",
+      URGENT: "bg-red-50 text-red-600 border-red-100"
     }[priority] || "bg-slate-50 text-slate-600 border-slate-100";
 
   return (
@@ -108,10 +109,12 @@ export default function DashboardPage() {
                   <div
                     className={cn(
                       "absolute left-0 top-0 bottom-0 w-1.5",
-                      task.priority === "HIGH"
+                      task.priority === "URGENT"
                         ? "bg-red-500"
+                        : task.priority === "HIGH"
+                        ? "bg-orange-400"
                         : task.priority === "MEDIUM"
-                        ? "bg-amber-400"
+                        ? "bg-yellow-400"
                         : "bg-emerald-400"
                     )}
                   />

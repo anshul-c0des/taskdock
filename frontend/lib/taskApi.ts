@@ -4,7 +4,7 @@ export interface TaskCreateInput {
   title: string;
   description?: string;
   dueDate: string;
-  priority?: "LOW" | "MEDIUM" | "HIGH";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string;
 }
@@ -13,7 +13,7 @@ export interface TaskUpdateInput {
   title?: string;
   description?: string;
   dueDate?: string;
-  priority?: "LOW" | "MEDIUM" | "HIGH";
+  priority?:"LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string;
 }
@@ -29,7 +29,7 @@ export interface Task {
   title: string;
   description?: string;
   dueDate: string;
-  priority: "LOW" | "MEDIUM" | "HIGH";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string | null;
   createdById: string;

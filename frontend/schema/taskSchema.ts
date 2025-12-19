@@ -27,7 +27,7 @@ export const taskSchema = z.object({
 
     return selected >= today;
   }, "Due date cannot be in the past"),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED"]),
   assignedToId: z.string().optional(),
   assignedUser: z.string().optional(),

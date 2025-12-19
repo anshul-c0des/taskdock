@@ -12,7 +12,7 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       return res.status(400).json({ error: "Title is required and must be a string" });
     }
 
-    const validPriorities = ["LOW", "MEDIUM", "HIGH"];
+    const validPriorities = ["LOW", "MEDIUM", "HIGH", "URGENT"];
     if (!priority || !validPriorities.includes(priority)) {
       return res.status(400).json({ error: "Priority must be one of LOW, MEDIUM, HIGH" });
     }
@@ -36,7 +36,6 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    // Emit socket events
     io.to(user.id).emit("task:created", task);
     if (assignedToId) io.to(assignedToId).emit("task:assigned", task);
 

@@ -27,9 +27,9 @@ export default function CreateTaskPage() {
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : "",
     };
 
+    router.push("/dashboard?tab=created");
     createTaskMutation.mutate(payload, {
       onSuccess: () => {
-        router.push("/dashboard?tab=created");
         toast.success("Task created successfully!");
       }, 
       onError: (error: any) => {
