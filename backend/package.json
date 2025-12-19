@@ -7,7 +7,11 @@
     "test": "jest --runInBand",
     "dev": "nodemon --watch app --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "lint": "eslint . --ext .ts",
+    "migrate": "DATABASE_URL=$DIRECT_URL prisma migrate deploy",
+    "generate": "prisma generate",
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
