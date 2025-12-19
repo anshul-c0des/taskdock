@@ -8,7 +8,7 @@ import { useCreateTask } from "@/hooks/useTasks";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { TaskForm } from "@/components/tasks/TaskForm";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function CreateTaskPage() {
   const { user, isInitializing } = useAuth();
@@ -29,8 +29,8 @@ export default function CreateTaskPage() {
 
     createTaskMutation.mutate(payload, {
       onSuccess: () => {
+        router.push("/dashboard?tab=created");
         toast.success("Task created successfully!");
-        router.push("/dashboard");
       }, 
       onError: (error: any) => {
         const message = error?.response?.data?.message || "Failed to create task.";
@@ -39,7 +39,14 @@ export default function CreateTaskPage() {
     });
   };
 
-  if (isInitializing) return null;
+  if (isInitializing) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
+          <p className="text-slate-500 text-sm font-medium">Just a sec...</p>
+        </div>
+      );
+    }
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-6 sm:py-10">
@@ -51,8 +58,8 @@ export default function CreateTaskPage() {
         <span className="text-sm font-medium">Back</span>
       </button>
       <Card className="border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
-        <CardHeader className="pt-8 pb-2 px-8">
-          <CardTitle className="text-2xl font-bold text-slate-900 tracking-tight">
+        <CardHeader className="pt-3 px-8">
+          <CardTitle className="text-2xl font-bold text-primary tracking-tight">
             Create New Task
           </CardTitle>
           <p className="text-sm text-slate-500 mt-1">

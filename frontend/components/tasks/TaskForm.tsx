@@ -34,6 +34,7 @@ interface TaskFormProps {
   submitLabel?: string;
   deleteLabel?: string;
   isSubmitting?: boolean;
+  isDeleting?: boolean;
 }
 
 export function TaskForm({
@@ -45,6 +46,7 @@ export function TaskForm({
   submitLabel = "Save Changes",
   deleteLabel = "Delete Task",
   isSubmitting,
+  isDeleting
 }: TaskFormProps) {
   const isCreator = taskMeta?.createdById === currentUserId;
   const isAssignee = taskMeta?.assignedToId === currentUserId;
@@ -86,11 +88,11 @@ export function TaskForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-1.5">
-        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Title</Label>
+        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Title {!isCreator && <span className="lowercase tracking-normal italic text-slate-400/70">(Not Editable)</span>}</Label>
         <Input 
           {...form.register("title")} 
-          disabled={!canEditDetails} 
-          className="h-10 border-slate-200 focus-visible:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
+          readOnly={!canEditDetails} 
+          className="h-10 border-slate-200 focus-visible:ring-indigo-500 disabled:bg-slate-50 readOnly:text-slate-500"
         />
         {form.formState.errors.title && (
           <p className="text-red-500 text-[11px] font-medium">{form.formState.errors.title.message}</p>
@@ -98,17 +100,17 @@ export function TaskForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Description</Label>
+        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Description {!isCreator && <span className="lowercase tracking-normal italic text-slate-400/70">(Not Editable)</span>}</Label>
         <Textarea 
           {...form.register("description")} 
-          disabled={!canEditDetails} 
+          readOnly={!canEditDetails} 
           className="min-h-[100px] border-slate-200 focus-visible:ring-indigo-500 resize-none disabled:bg-slate-50"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Due Date</Label>
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Due Date {!isCreator && <span className="lowercase tracking-normal italic text-slate-400/70">(Not Editable)</span>}</Label>
           <div className="relative">
             <CalendarIcon className="absolute left-3 top-2.5 w-4 h-4 text-slate-400 z-10" />
             <DatePicker
@@ -120,12 +122,17 @@ export function TaskForm({
                   form.setValue("dueDate", "");
                 }
               }}
-              disabled={!canEditDetails}
+              readOnly={!canEditDetails}
               placeholderText="Set deadline"
               className="pl-9 h-10 border border-slate-200 w-full rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-50"
               dateFormat="yyyy-MM-dd"
             />
           </div>
+          {form.formState.errors.dueDate && (
+            <p className="text-red-500 text-[11px] font-medium">
+              {form.formState.errors.dueDate.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -172,7 +179,7 @@ export function TaskForm({
       </div>
 
       <div className="space-y-1.5 relative" ref={dropdownRef}>
-        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Assignee</Label>
+        <Label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Assignee {!isCreator && <span className="lowercase tracking-normal italic text-slate-400/70">(Not Editable)</span>}</Label>
         <div className="relative">
           <UserPlus className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
           <Input
@@ -180,10 +187,11 @@ export function TaskForm({
             value={searchQuery}
             onFocus={() => canEditDetails && setShowUserList(true)}
             onChange={(e) => {
+              if (!canEditDetails) return;
               setSearchQuery(e.target.value);
               setShowUserList(true);
             }}
-            disabled={!canEditDetails}
+            readOnly={!canEditDetails}
             className="pl-9 h-10 border-slate-200 disabled:bg-slate-50"
           />
           {canEditDetails && (selectedUser || searchQuery) && (
@@ -238,9 +246,9 @@ export function TaskForm({
         <Button 
           type="submit" 
           disabled={isSubmitting}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-6 h-10 shadow-lg shadow-indigo-200"
+          className="bg-indigo-600 cursor-pointer hover:bg-indigo-700 text-white rounded-xl px-6 h-10 shadow-lg shadow-indigo-200"
         >
-          {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</> : submitLabel}
+          {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />{submitLabel === "Create Task" ? "Creating..." : "Saving..."}</> : submitLabel}
         </Button>
         
         {onDelete && isCreator && (
@@ -248,9 +256,9 @@ export function TaskForm({
             type="button" 
             variant="ghost" 
             onClick={onDelete}
-            className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl h-10"
+            className="text-red-500 hover:text-red-600 hover:bg-red-200 rounded-xl h-10 cursor-pointer bg-red-50"
           >
-            {deleteLabel}
+            {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Deleting...</> : deleteLabel}
           </Button>
         )}
       </div>

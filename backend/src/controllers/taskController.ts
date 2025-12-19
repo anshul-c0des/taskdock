@@ -146,7 +146,7 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
 
     io.to(task.createdById).emit("task:updated", updatedTask);
     if (updatedTask.assignedToId) io.to(updatedTask.assignedToId).emit("task:updated", updatedTask);
-
+    console.log("Backend returned:", updateTask);
     res.status(200).json({ task: updatedTask });
   } catch (err) {
     next(err);

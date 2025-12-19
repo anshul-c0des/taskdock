@@ -51,8 +51,8 @@ export default function TaskDetailsPage() {
       { taskId: task!.id, data: updateData },
       {
         onSuccess: () => {
-          toast.success("Task updated successfully");
           router.push("/dashboard");
+          toast.success("Task updated successfully!");
         },
         onError: () => toast.error("Failed to update task")
       }
@@ -61,10 +61,10 @@ export default function TaskDetailsPage() {
   
   const handleDelete = () => {
     if (!taskId) return;
+    router.push("/dashboard");
     deleteTaskMutation.mutate(taskId, {
       onSuccess: () => {
         toast.success("Task deleted");
-        router.push('/dashboard');
       },
       onError: () => toast.error("Failed to delete task")
     });
@@ -73,7 +73,7 @@ export default function TaskDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
         <p className="text-slate-500 text-sm font-medium">Fetching task details...</p>
       </div>
     );
@@ -103,12 +103,17 @@ export default function TaskDetailsPage() {
       </button>
 
       <Card className="border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
-        <CardHeader className="pt-8 pb-2 px-8">
-          <CardTitle className="text-2xl font-bold text-slate-900 tracking-tight">
+        <CardHeader className="pt-3 px-8">
+          <CardTitle className="text-2xl font-bold text-primary tracking-tight">
             Task Details
           </CardTitle>
-          <p className="text-sm text-slate-500 mt-1">
-            View or modify task parameters and status.
+          <p className="text-sm text-slate-500">
+            {task.createdById === user?.id && (
+              "View or modify parameters for this task."
+            )}
+            {task.assignedToId === user?.id && (
+              <p>View or modify <span className="text-slate-700 font-semibold">priority and status</span> for this task.</p>
+            )}
           </p>
         </CardHeader>
 
@@ -133,6 +138,7 @@ export default function TaskDetailsPage() {
             submitLabel="Save Changes"
             deleteLabel="Delete Task"
             isSubmitting={updateTaskMutation.isPending}
+            isDeleting={deleteTaskMutation.isPending}
           />
         </CardContent>
       </Card>

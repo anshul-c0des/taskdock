@@ -23,8 +23,8 @@ export function DashboardTabs() {
   };
 
   return (
-    <div className="flex justify-center w-full px-4 mb-7 mt-4">
-      <div className="inline-flex items-center p-1 bg-slate-200/40 rounded-2xl border border-slate-200/60 w-full max-w-[450px]">
+    <div className="flex justify-center w-full px-4 mt-4">
+      <div className="inline-flex items-center p-1 bg-indigo-100/40 rounded-2xl w-full max-w-[450px]">
         {tabs.map((tab) => {
           const isActive = active === tab.key;
           const Icon = tab.icon;
@@ -34,17 +34,22 @@ export function DashboardTabs() {
               key={tab.key}
               onClick={() => handleChange(tab.key)}
               className={cn(
-                "relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all",
+                "relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 cursor-pointer text-sm font-semibold rounded-xl transition-all duration-200 ease-in-out",
                 isActive
-                  ? "bg-white text-[#6366F1] shadow-md"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-white/30"
+                  ? "bg-white text-indigo-600 shadow-md shadow-indigo-100"
+                  : "text-slate-500 hover:text-primary hover:bg-indigo-100/50"
               )}
             >
-              <Icon className={cn("w-4 h-4", isActive ? "text-[#6366F1]" : "text-slate-400")} />
+              <Icon
+                className={cn(
+                  "w-4 h-4 hover:text-indigo-600",
+                  isActive ? "text-indigo-600" : "text-slate-400"
+                )}
+              />
               <span className="hidden sm:inline">{tab.label}</span>
 
               {isActive && (
-                <div className="absolute bottom-1.5 w-1.5 h-1.5 bg-[#6366F1] rounded-full" />
+                <div className="absolute bottom-1 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
               )}
             </button>
           );

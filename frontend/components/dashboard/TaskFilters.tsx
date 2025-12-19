@@ -42,7 +42,7 @@ export function TaskFilters({ onChange }: Props) {
             <div className="flex items-center gap-2 cursor-pointer sm:cursor-default w-fit">
               <div className="flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-[#6366F1]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">
+                <span className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 whitespace-nowrap">
                   Filter By
                 </span>
               </div>
@@ -71,7 +71,7 @@ export function TaskFilters({ onChange }: Props) {
 
 function FilterBar({ onChange }: { onChange: (filters: any) => void }) {
   return (
-    <div className="flex flex-col sm:flex-row items-center bg-slate-200/40 backdrop-blur-md p-1 rounded-2xl border border-slate-200/60 w-full sm:w-fit shadow-sm">
+    <div className="flex flex-col sm:flex-row items-center bg-indigo-100/20 backdrop-blur-md p-1 rounded-2xl w-full sm:w-fit">
       <Select onValueChange={(value) => onChange({ status: value })}>
         <SelectTrigger className="w-full sm:w-[145px] h-9 border-none bg-transparent hover:bg-white/60 rounded-xl focus:ring-0 focus:ring-offset-0 transition-all shadow-none px-4 text-slate-600">
           <div className="flex items-center gap-2.5">

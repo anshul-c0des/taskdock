@@ -11,20 +11,23 @@ import {
   CircleDot, 
   Clock, 
   Mail, 
-  CalendarDays, 
   ChevronRight,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { data: tasks = [], isLoading } = useTasks();
+  const router = useRouter();
 
   if (!user || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
+        <p className="text-slate-500 text-sm font-medium">Loading profile...</p>
       </div>
     );
   }
@@ -45,16 +48,23 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-10 space-y-6 md:space-y-10">
+      <button 
+        onClick={() => router.back()}
+        className="hidden md:flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors mb-6 group"
+      >
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+        <span className="text-sm font-medium">Back</span>
+      </button>
       
-      <section className="flex flex-col md:flex-row items-center gap-4 md:gap-8 p-6 md:p-10 bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] shadow-sm">
+      <section className="flex flex-col md:flex-row items-center gap-4 md:gap-8 p-6 md:p-10 bg-white border border-primary rounded-2xl md:rounded-[2rem] shadow-sm">
         <Avatar className="h-20 w-20 md:h-28 md:w-28 border-4 border-indigo-50 shadow-sm">
-          <AvatarFallback className="bg-[#6366F1] text-white text-xl md:text-3xl font-bold">
+          <AvatarFallback className="bg-primary text-white text-2xl md:text-5xl font-bold">
             {user.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
         
         <div className="text-center md:text-left flex flex-col gap-2">
-          <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">
             {user.name}
           </h2>
           <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 text-slate-500">
@@ -65,14 +75,13 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* Stats Grid - 2 columns on small, 3 on larger */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
         {stats.map((stat, idx) => (
           <Card 
             key={stat.label} 
             className={cn(
               "border-slate-200 shadow-none rounded-2xl overflow-hidden",
-              idx === 2 ? "col-span-2 md:col-span-1" : "col-span-1" // Make 3rd card wide on mobile
+              idx === 2 ? "col-span-2 md:col-span-1" : "col-span-1"
             )}
           >
             <CardContent className="p-4 md:p-6 flex flex-col sm:flex-row items-center sm:justify-between gap-3 text-center sm:text-left">
@@ -92,7 +101,6 @@ export default function ProfilePage() {
         ))}
       </div>
 
-      {/* Recent Activity Section */}
       <div className="space-y-4">
         <div className="flex items-end justify-between px-1">
           <div>

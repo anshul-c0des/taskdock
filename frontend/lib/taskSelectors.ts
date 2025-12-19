@@ -40,13 +40,13 @@ export function selectTasks({
 
   if (filters.sort === "due_asc") {
     result.sort(
-      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
   }
 
   if (filters.sort === "due_desc") {
     result.sort(
-      (a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime()
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 

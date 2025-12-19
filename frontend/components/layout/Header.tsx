@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, usePathname } from "next/navigation";
@@ -37,37 +37,42 @@ export default function Header() {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (notification: Omit<Notification, "id" | "timestamp" | "read">) => {
-    setNotifications(prev => {
+  const addNotification = (
+    notification: Omit<Notification, "id" | "timestamp" | "read">
+  ) => {
+    setNotifications((prev) => {
       const newNotification: Notification = {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
         read: false,
-        ...notification
+        ...notification,
       };
       return [newNotification, ...prev].slice(0, 10);
     });
   };
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  // Socket integration
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !user) return;
 
     const handleEvent = (task: any, type: Notification["type"]) => {
       if (!task) return;
-      const isUserInvolved = task.createdById === user.id || task.assignedToId === user.id;
+      const isUserInvolved =
+        task.createdById === user.id || task.assignedToId === user.id;
       if (!isUserInvolved) return;
 
       addNotification({ type, taskTitle: task.title, taskId: task.id });
 
-      if (type === "assigned" && task.assignedToId === user.id) toast.success(`You were assigned: ${task.title}`);
-      if (type === "updated") toast(`Task updated: ${task.title}`, { icon: "✏️" });
-      if (type === "deleted") toast(`Task deleted: ${task.title}`, { icon: "🗑️" });
+      if (type === "assigned" && task.assignedToId === user.id)
+        toast.success(`You were assigned: ${task.title}`);
+      if (type === "updated" && task.assignedToId === user.id)
+        toast(`Task updated: ${task.title}`, { icon: "✏️" });
+      if (type === "deleted" && task.assignedToId === user.id)
+        toast(`Task deleted: ${task.title}`, { icon: "🗑️" });
     };
 
     socket.on("task:assigned", (task) => handleEvent(task, "assigned"));
@@ -75,15 +80,15 @@ export default function Header() {
     socket.on("task:deleted", (task) => handleEvent(task, "deleted"));
 
     return () => {
-      [ "task:assigned", "task:updated", "task:deleted"].forEach(event =>
+      ["task:assigned", "task:updated", "task:deleted"].forEach((event) =>
         socket.off(event)
       );
     };
   }, [user]);
 
   const handleLogout = async () => {
-    await logoutUser();
     router.push("/");
+    await logoutUser();
     toast.success("Logged out successfully");
   };
 
@@ -91,7 +96,6 @@ export default function Header() {
     <>
       <header className="relative md:sticky top-0 z-50 w-full bg-white md:bg-white/90 md:backdrop-blur-md border-b border-slate-200">
         <div className="h-16 px-4 md:px-12 lg:px-20 max-w-[1440px] mx-auto flex items-center justify-between gap-3">
-          
           <Link href="/dashboard" className="flex items-center gap-3 shrink-0">
             <div className="bg-[#6366F1] p-2 rounded-xl shadow-lg shadow-indigo-100">
               <LayoutDashboard className="w-5 h-5 text-white" />
@@ -102,70 +106,148 @@ export default function Header() {
           </Link>
 
           {isDashboard && (
-            <div className="hidden md:flex flex-1 justify-center max-w-md mx-auto mt-3">
+            <div className="hidden md:flex flex-1 justify-center max-w-md mx-auto -mt-4">
               <DashboardTabs />
             </div>
           )}
 
           <div className="flex items-center gap-3 shrink-0">
-            {/* Notifications Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="relative">
-                <Bell className="w-6 h-6 text-slate-700 hover:text-indigo-600 transition-colors" />
-                {notifications.some(n => !n.read) && (
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
-                )}
+            <DropdownMenu onOpenChange={(open) => open && markAllRead()}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative hover:bg-slate-200 cursor-pointer rounded-full transition-all group bg-indigo-100/40"
+                >
+                  <Bell className="w-6 h-6 text-slate-600 group-hover:text-indigo-600 transition-all" />
+                  {notifications.some((n) => !n.read) && (
+                    <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
+                    </span>
+                  )}
+                </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-1 rounded-2xl shadow-2xl border bg-white max-h-96 overflow-y-auto">
-                <DropdownMenuLabel className="px-3 py-2 font-bold">Notifications</DropdownMenuLabel>
-                {notifications.length === 0 && <div className="px-3 py-2 text-sm text-slate-500">No notifications</div>}
-                {notifications.map(n => (
-                  <DropdownMenuItem
-                    key={n.id}
-                    asChild
-                    onClick={markAllRead}
-                    className={`flex flex-col gap-0.5 py-2 px-3 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors ${!n.read ? "bg-indigo-50" : ""}`}
-                  >
-                    <Link href={`/tasks/${n.taskId}`}>
-                      <span className="text-sm font-medium text-slate-900">{n.taskTitle}</span>
-                      <span className="text-xs text-slate-500">{n.type.toUpperCase()} - {new Date(n.timestamp).toLocaleTimeString()}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-80 p-1.5 rounded-2xl shadow-xl border border-slate-200 bg-white"
+              >
+                <div className="flex items-center justify-between px-3 py-2 mb-1">
+                  <DropdownMenuLabel className="p-0 font-semibold text-slate-900">
+                    Notifications
+                  </DropdownMenuLabel>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {notifications.length} Total
+                  </span>
+                </div>
+
+                <div className="max-h-[380px] overflow-y-auto overflow-x-hidden space-y-1">
+                  {notifications.length === 0 ? (
+                    <div className="py-10 text-center">
+                      <p className="text-sm text-slate-400">All caught up!</p>
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <DropdownMenuItem
+                        key={n.id}
+                        asChild
+                        className="flex items-start gap-3 p-3 rounded-xl cursor-pointer focus:bg-slate-50 transition-colors border border-transparent"
+                      >
+                        <Link href={`/tasks/${n.taskId}`}>
+                          <div className="mt-1.5 shrink-0">
+                            <div
+                              className={`w-2 h-2 rounded-full ${
+                                !n.read ? "bg-indigo-600" : "bg-slate-200"
+                              }`}
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1 overflow-hidden">
+                            <span
+                              className={`text-sm leading-none truncate ${
+                                !n.read
+                                  ? "font-semibold text-slate-900"
+                                  : "text-slate-600"
+                              }`}
+                            >
+                              {n.taskTitle}
+                            </span>
+
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-[11px] px-1.5 py-0.5 rounded-md font-medium uppercase tracking-tight
+                      ${
+                        n.type === "assigned"
+                          ? "bg-blue-50 text-blue-600"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                              >
+                                {n.type}
+                              </span>
+                              <span className="text-[11px] text-slate-400 font-medium">
+                                {new Date(n.timestamp).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <Link href="/tasks/create" className="hidden md:block">
-              <Button className="bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-xl px-5 h-10 text-sm font-semibold transition-all">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="bg-indigo-100/50 hover:bg-primary cursor-pointer hover:text-white text-primary rounded-xl px-5 h-10 text-md font-semibold transition-all">
+                <Plus className="w-5 h-5" />
                 Create Task
               </Button>
             </Link>
 
-            {/* Avatar Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="outline-none">
-                <Avatar className="h-9 w-9 md:h-10 md:w-10 border border-slate-200 hover:border-indigo-300 transition-colors">
-                  <AvatarFallback className="bg-indigo-50 text-[#6366F1] font-bold">{firstLetter}</AvatarFallback>
+                <Avatar className="h-9 w-9 cursor-pointer md:h-10 md:w-10 border border-slate-200 hover:border-indigo-300 transition-colors">
+                  <AvatarFallback className="bg-indigo-50 text-[#6366F1] font-bold">
+                    {firstLetter}
+                  </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-1.5 rounded-2xl mt-2 shadow-2xl border-slate-100 bg-white">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 p-1.5 rounded-2xl mt-2 shadow-2xl border-slate-100 bg-white"
+              >
                 <DropdownMenuLabel className="font-normal px-3 py-3">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-sm font-bold text-slate-900">{user?.name}</span>
-                    <span className="text-xs text-slate-500 truncate">{user?.email}</span>
+                    <span className="text-sm font-bold text-slate-900">
+                      {user?.name}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate">
+                      {user?.email}
+                    </span>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-slate-100" />
-                <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer py-2.5 rounded-xl gap-3 text-slate-600 focus:text-indigo-600 focus:bg-indigo-50 transition-colors">
-                  <User className="w-4 h-4" /> <span className="font-medium text-sm">Profile</span>
+                <DropdownMenuItem
+                  onClick={() => router.push("/profile")}
+                  className="cursor-pointer py-2.5 rounded-xl gap-3 text-slate-600 focus:text-indigo-600 focus:bg-indigo-50 transition-colors"
+                >
+                  <User className="w-4 h-4" />{" "}
+                  <span className="font-medium text-sm">Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer py-2.5 rounded-xl gap-3 text-red-600 focus:bg-red-50 focus:text-red-600 transition-colors">
-                  <LogOut className="w-4 h-4" /> <span className="font-medium text-sm">Logout</span>
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer py-2.5 rounded-xl gap-3 text-red-600 focus:bg-red-50 focus:text-red-600 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />{" "}
+                  <span className="font-medium text-sm">Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
           </div>
         </div>
       </header>

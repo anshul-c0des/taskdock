@@ -33,7 +33,7 @@ export function registerSocketHandlers(userId: string, queryClient: QueryClient)
       if (!isCreator && !isAssignee) return old;
       if (old.some(t => t?.id === task?.id)) return old;
       if (isAssignee && !isCreator) {
-        toast.success(`You were assigned a new task: ${task.title}`);
+        toast.success(`You were assigned ${task.title} task by: ${task.assignedTo?.name}`);
       }
       return [task, ...old];
     });
@@ -43,7 +43,7 @@ export function registerSocketHandlers(userId: string, queryClient: QueryClient)
     if (!task || task.assignedToId !== userId) return;
     updateTaskList(task, old => {
       if (old.some(t => t?.id === task?.id)) return old;
-      toast.success(`You were assigned: ${task.title}`);
+      toast.success(`You were assigned ${task.title} task by: ${task.assignedTo?.name}`);
       return [task, ...old];
     });
   });
