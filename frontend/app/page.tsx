@@ -55,12 +55,12 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/auth/login" className="w-full sm:w-auto">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-md border-2 shadow-lg shadow-primary/20  border-primary  bg-white/50 backdrop-blur-sm cursor-pointer text-primary hover:bg-primary hover:text-white">
+              <Button variant="outline" size="lg" className="w-full transition sm:w-auto h-12 px-8 text-md border-2 shadow-lg shadow-primary/20  border-primary  bg-white/50 backdrop-blur-sm cursor-pointer text-primary hover:bg-primary hover:text-white">
                 Log In
               </Button>
             </Link>
             <Link href="/auth/register" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-md gap-2 shadow-lg shadow-primary/20 cursor-pointer hover:bg-white hover:text-primary">
+              <Button size="lg" className="w-full sm:w-auto h-12 px-8 transition border-2 border-transparent hover:border-primary text-md gap-2 shadow-lg shadow-primary/20 cursor-pointer hover:bg-white hover:text-primary">
                 Start for free <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
