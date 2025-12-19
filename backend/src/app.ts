@@ -15,6 +15,10 @@ app.use(
   }),
 );
 
+app.get('/', (_req, res) => {
+  res.status(200).json({ message: 'TaskDock is live' });
+});
+
 app.use(express.json());
 app.use(cookieParser());
 
