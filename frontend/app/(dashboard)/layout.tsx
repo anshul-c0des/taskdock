@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {   // fetch user on mount, else redirect to login
     if (!isInitializing && !user) {
-      router.push("/auth/login");
+      router.replace("/auth/login");
     } else if (user) {
       connectSocket(user.id);
       registerSocketHandlers(user.id, queryClient);
