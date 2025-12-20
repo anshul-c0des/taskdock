@@ -10,11 +10,15 @@ import {
   TaskUpdateInput,
 } from "@/lib/taskApi";
 import toast from "react-hot-toast";
+import { useAuth } from "./useAuth";
+
+const { user, isInitializing } = useAuth();
 
 export function useTasks() {   // fetches all tasks
   return useQuery<Task[]>({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
+    enabled: !!user && !isInitializing,
   });
 }
 

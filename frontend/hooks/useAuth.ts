@@ -14,19 +14,17 @@ export const useAuth = () => {
   const [error, setError] = useState<string | null>(null);   // error state
   const [isInitializing, setIsInitializing] = useState(true);   // init state for user fetch
 
-
-  const fetchUser = async () => {
-    try {
-      const res = await api.get("/users/me");
-      setUser(res.data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setIsInitializing(false);
-    }
-  };
-
-  useEffect(() => {
+  useEffect(() => {   // fetch user on mount
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/users/me");
+        setUser(res.data.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
     fetchUser();
   }, []);
 
@@ -54,7 +52,6 @@ export const useAuth = () => {
     try {
       const res = await api.post("/auth/login", data);
       setUser(res.data.user);   // set user
-      setIsInitializing(false)
       return res.data;
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
