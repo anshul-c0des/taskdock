@@ -69,7 +69,7 @@ export default function DashboardPage() {
     | "overdue";
 
   if (isInitializing || !user){
-    redirect('/auth/login');
+    return null;
   }
   const userId = user.id;
 
