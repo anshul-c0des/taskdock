@@ -68,6 +68,7 @@ export const useAuth = () => {
       console.warn("Logout failed", err);
     } finally {
       setUser(null);
+      setIsInitializing(false);
     }
   };
 

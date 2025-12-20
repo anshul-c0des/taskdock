@@ -8,7 +8,7 @@ import { selectTasks } from "@/lib/taskSelectors";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Calendar, User, Clock, ChevronRight, Inbox } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { SkeletonLoader } from "@/components/SkeletonLoader";
 
 type Filters = {
@@ -68,7 +68,9 @@ export default function DashboardPage() {
     | "created"
     | "overdue";
 
-  if (isInitializing || !user) return null;
+  if (isInitializing || !user){
+    redirect('/auth/login');
+  }
   const userId = user.id;
 
   if (isLoading) {

@@ -88,8 +88,9 @@ export default function Header() {
   }, [user]);
 
   const handleLogout = async () => {   // logs out current user
-    router.push("/");
     await logoutUser();
+    router.replace("/");
+    router.refresh();
     toast.success("Logged out successfully");
   };
 
