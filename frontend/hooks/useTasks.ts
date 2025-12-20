@@ -12,9 +12,9 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "./useAuth";
 
-const { user, isInitializing } = useAuth();
 
 export function useTasks() {   // fetches all tasks
+  const { user, isInitializing } = useAuth();
   return useQuery<Task[]>({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
