@@ -17,13 +17,13 @@ type Filters = {
   sort?: "due_asc" | "due_desc";
 };
 
-const PriorityBadge = ({ priority }: { priority: string }) => {
+const PriorityBadge = ({ priority }: { priority: string }) => {   // custom badge for priorities
   const styles =
     {
       HIGH: "bg-orange-50 text-orange-600 border-orange-100",
       MEDIUM: "bg-yellow-50 text-yellow-600 border-yellow-100",
       LOW: "bg-emerald-50 text-emerald-600 border-emerald-100",
-      URGENT: "bg-red-50 text-red-600 border-red-100"
+      URGENT: "bg-red-50 text-red-600 border-red-100",
     }[priority] || "bg-slate-50 text-slate-600 border-slate-100";
 
   return (
@@ -38,7 +38,7 @@ const PriorityBadge = ({ priority }: { priority: string }) => {
   );
 };
 
-const StatusBadge = ({ status }: { status: string }) => {
+const StatusBadge = ({ status }: { status: string }) => {   // custom badge for status
   const styles =
     {
       COMPLETED: "bg-indigo-50 text-indigo-600",
@@ -59,10 +59,10 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 export default function DashboardPage() {
-  const { data: tasks = [], isLoading } = useTasks();
-  const { user, isInitializing } = useAuth();
-  const [filters, setFilters] = useState<Filters>({});
-  const searchParams = useSearchParams();
+  const { data: tasks = [], isLoading } = useTasks();   // get all tasks
+  const { user, isInitializing } = useAuth();   // gets current user
+  const [filters, setFilters] = useState<Filters>({});   // filter state
+  const searchParams = useSearchParams();   // for tab navigation
   const tab = (searchParams.get("tab") ?? "assigned") as
     | "assigned"
     | "created"
@@ -75,13 +75,15 @@ export default function DashboardPage() {
     return <SkeletonLoader />;
   }
 
-  const visibleTasks = selectTasks({ tasks, tab, userId, filters });
+  const visibleTasks = selectTasks({ tasks, tab, userId, filters });   // for filtering
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
       <div className="space-y-4">
-        <TaskFilters onChange={(f) => setFilters({ ...filters, ...f })} />
 
+        {/* Filters */}
+        <TaskFilters onChange={(f) => setFilters({ ...filters, ...f })} />
+          
         <div className="flex items-center gap-2 px-1 pb-2 ml-2">
           <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
           <p className="text-slate-500 text-sm font-medium ml-1">
@@ -105,7 +107,9 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 gap-3">
             {visibleTasks.map((task) => (
               <Link key={task.id} href={`/tasks/${task.id}`} className="group">
-                <div className={`bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-xl hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 relative overflow-hidden`}>
+                <div
+                  className={`bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-xl hover:shadow-indigo-500/5 hover:border-indigo-200 transition-all duration-300 relative overflow-hidden`}
+                >
                   <div
                     className={cn(
                       "absolute left-0 top-0 bottom-0 w-1.5",

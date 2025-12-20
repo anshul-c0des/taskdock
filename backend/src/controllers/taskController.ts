@@ -1,43 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../lib/prisma';
-import { io } from '../lib/socket';
-import { assignTask } from '../services/taskService';
+import { Request, Response, NextFunction } from "express";
+import { prisma } from "../lib/prisma";
+import { io } from "../lib/socket";
+import { assignTask } from "../services/taskService";
 
-export const createTask = async (req: Request, res: Response, next: NextFunction) => {
+export const createTask = async (   // creates a new task
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
-    const { title, description, priority, dueDate, assignedToId } = req.body;
+    const { title, description, priority, status, dueDate, assignedToId } =
+      req.body;
 
-    if (!title || typeof title !== "string") {
-      return res.status(400).json({ error: "Title is required and must be a string" });
-    }
-
-    const validPriorities = ["LOW", "MEDIUM", "HIGH", "URGENT"];
-    if (!priority || !validPriorities.includes(priority)) {
-      return res.status(400).json({ error: "Priority must be one of LOW, MEDIUM, HIGH" });
-    }
-
-    let parsedDueDate: Date | null = null;
-    if (dueDate && dueDate.trim() !== "") {
-      const d = new Date(dueDate);
-      if (isNaN(d.getTime())) {
-        return res.status(400).json({ error: "Invalid dueDate format" });
-      }
-      parsedDueDate = d;
-    }
     const task = await prisma.task.create({
       data: {
         title,
         description: description || "",
         priority,
-        dueDate: parsedDueDate,
+        status,
+        dueDate: dueDate ? new Date(dueDate) : null,
         createdById: user.id,
         assignedToId: assignedToId || null,
       },
     });
 
-    io.to(user.id).emit("task:created", task);
-    if (assignedToId) io.to(assignedToId).emit("task:assigned", task);
+    io.to(user.id).emit("task:created", task);   // socket noti for task creation
+    if (assignedToId) io.to(assignedToId).emit("task:assigned", task);   // real time notifications for assigned user
 
     res.status(201).json({ task });
   } catch (err) {
@@ -45,17 +34,17 @@ export const createTask = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-
-export const getTasks = async (req: Request, res: Response, next: NextFunction) => {
+export const getTasks = async (   // get all tasks associated with current user
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
 
-    const tasks = await prisma.task.findMany({
+    const tasks = await prisma.task.findMany({   // finds tasks where user is creator or assignee
       where: {
-        OR: [
-          { createdById: user.id },
-          { assignedToId: user.id },
-        ],
+        OR: [{ createdById: user.id }, { assignedToId: user.id }],
       },
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
@@ -72,8 +61,11 @@ export const getTasks = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-
-export const getTaskById = async (req: Request, res: Response, next: NextFunction) => {
+export const getTaskById = async (   // fetches a specific task
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
     const { id } = req.params;
@@ -81,10 +73,7 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
     const task = await prisma.task.findFirst({
       where: {
         id,
-        OR: [
-          { createdById: user.id },
-          { assignedToId: user.id },
-        ],
+        OR: [{ createdById: user.id }, { assignedToId: user.id }],
       },
       include: {
         createdBy: { select: { id: true, name: true, email: true } },
@@ -102,34 +91,40 @@ export const getTaskById = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const updateTask = async (req: Request, res: Response, next: NextFunction) => {
+export const updateTask = async (   // updates task fields, restricts access based on ownership of this task
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
     const { id } = req.params;
-    const { title, description, status, priority, dueDate, assignedToId } = req.body;
+    const { title, description, status, priority, dueDate, assignedToId } =
+      req.body;
     const task = await prisma.task.findUnique({
       where: { id },
     });
 
     if (!task) return res.status(404).json({ message: "Task not found" });
 
-    const isCreator = task.createdById === user.id;
-    const isAssigned = task.assignedToId === user.id;
+    const isCreator = task.createdById === user.id;   // is current user the creator
+    const isAssigned = task.assignedToId === user.id;   // is current user the assignee
 
-    if (!isCreator && !isAssigned) {
+    if (!isCreator && !isAssigned) {   // if neither creator nor assingee, then block access
       return res.status(403).json({ message: "Forbidden" });
     }
 
     const data: any = {};
 
-    if (isCreator) {
+    if (isCreator) {   // creator can edit any field
       if (title !== undefined) data.title = title;
       if (description !== undefined) data.description = description;
       if (status !== undefined) data.status = status;
       if (priority !== undefined) data.priority = priority;
-      if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
+      if (dueDate !== undefined)
+        data.dueDate = dueDate ? new Date(dueDate) : null;
       if (assignedToId !== undefined) data.assignedToId = assignedToId || null;
-    } else if (isAssigned) {
+    } else if (isAssigned) {   // assignee can only update priority and status
       if (priority !== undefined) data.priority = priority;
       if (status !== undefined) data.status = status;
     }
@@ -144,45 +139,53 @@ export const updateTask = async (req: Request, res: Response, next: NextFunction
     });
 
     io.to(task.createdById).emit("task:updated", updatedTask);
-    if (updatedTask.assignedToId) io.to(updatedTask.assignedToId).emit("task:updated", updatedTask);
+    if (updatedTask.assignedToId)
+      io.to(updatedTask.assignedToId).emit("task:updated", updatedTask);
     res.status(200).json({ task: updatedTask });
   } catch (err) {
     next(err);
   }
 };
 
-
-export const deleteTask = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteTask = async (   // deletes a task
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
     const { id } = req.params;
 
     const task = await prisma.task.findUnique({ where: { id } });
-    if (!task) return res.status(404).json({ message: 'Task not found' });
-    if (task.createdById !== user.id) return res.status(403).json({ message: 'Forbidden' });
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    if (task.createdById !== user.id)   // if not creator then cannot delete
+      return res.status(403).json({ message: "Forbidden" });
+
     const assignedToId = task.assignedToId;
     await prisma.task.delete({ where: { id } });
 
-    io.to(user.id).emit('task:deleted', task);
+    io.to(user.id).emit("task:deleted", task);   // notification for task delete
 
-    if(assignedToId) io.to(assignedToId).emit('task:deleted', task);
+    if (assignedToId) io.to(assignedToId).emit("task:deleted", task);   // notification to assignee if exists
 
-    res.status(200).json({ message: 'Task deleted' });
+    res.status(200).json({ message: "Task deleted" });
   } catch (err) {
     next(err);
   }
 };
 
-
-export const assignTaskController = async (req: Request, res: Response, next: NextFunction) => {
+export const assignTaskController = async (   // assigns task to a user (used for testing)
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { taskId } = req.params;
     const { assignedToId } = req.body;
 
-    // Update the task assignment
     const updatedTask = await assignTask(taskId, assignedToId);
 
-    // Emit socket notification
     io.to(assignedToId).emit("task:assigned", updatedTask);
 
     res.status(200).json({ task: updatedTask });

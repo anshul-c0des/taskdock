@@ -1,8 +1,7 @@
-# TaskDock
+# TaskDock 🚀
 
 A full-stack, collaborative task management application with real-time updates, user authentication, task CRUD, and personal dashboards. Built with a mobile-first approach.
 
----
 
 ## Table of Contents
 
@@ -18,7 +17,7 @@ A full-stack, collaborative task management application with real-time updates, 
 
 ---
 
-## Features
+## Features ✨
 
 - User authentication (JWT via HttpOnly cookies + bcrypt)  
 - User profiles  
@@ -28,11 +27,11 @@ A full-stack, collaborative task management application with real-time updates, 
 - Personal dashboards (created tasks, assigned tasks, overdue tasks)  
 - Filtering & sorting of tasks  
 - Mobile-first responsive design  
-- Optimistic UI
+- Optimistic UI for snappier performance
 
 ---
 
-## Tech Stack
+## Tech Stack 🛠️
 
 **Frontend:**
 - Next.js (Pages Router)
@@ -56,13 +55,13 @@ A full-stack, collaborative task management application with real-time updates, 
 - Jest (for unit testing)
 
 **Deployment:**
-- Backend (Cold Start): [Render]('https://taskdock-sqsv.onrender.com')
-- Frontend: [Vercel]('https://taskdock-one.vercel.app')
+- Backend (Cold Start): [Render](https://taskdock-sqsv.onrender.com)
+- Frontend: [Vercel](https://taskdock-one.vercel.app)
 - Database: Supabase (PostgreSQL)
 
 ---
 
-## Setup Instructions
+## Setup Instructions ⚡
 
 ### Backend
 
@@ -125,13 +124,13 @@ npm run dev
 
 App will be available at http://localhost:3000.
 
-### Docker Setup
+### Docker Setup 🐳
 Build and run the containers:
 ```bash
 docker-compose up --build
 ```
 
-### Testing
+### Testing 🧪
 Critical backend logic (task creation, assignment, & socket) is covered with Jest unit tests.
 Run tests:
 ```bash
@@ -139,7 +138,7 @@ cd backend
 npm run test
 ```
 
-## API Documentation
+## API Documentation 📚
 
 - Base URL: /api
 
@@ -171,14 +170,14 @@ npm run test
 | PUT    | /tasks/:taskId/assign      | `{ assignedToId }`                                 | Assign a task to a user                  |
 
 
-## Architecture Overview & Design Decisions
+## Architecture Overview & Design Decisions 🏗️
 
 - **Authentication:** **JWT** stored in **HttpOnly cookies** for better security.`requireAuth` middleware protects routes.
 - **Task Ownership:** Only **creators** can fully update tasks.**Assignees** can update only **status** and **priority**.
 - **Database Choice:** **Supabase (PostgreSQL)** provides a scalable relational database with Prisma integration.
 - **Validation:** Request bodies are validated using **Zod**.
 
-## Socket.io Integration
+## Socket.io Integration ⚡
 - Integrated into the backend via `lib/socket.ts`.  
 - Backend emits events on task creation, updates, deletion, and assignment:
   - `"task:created"`
@@ -189,7 +188,7 @@ npm run test
 
 ## Trade-offs & Assumptions
 - JWTs are stored in cookies for security, **not localStorage**.  
-- Simple task priority system: **LOW, MEDIUM, HIGH**.  
 - Only **task creators or assignees** can edit tasks.  
 - Socket.io events assume users are **connected and joined rooms** based on user ID.  
 - Minimal search results for users (**max 10**) to reduce payload.
+- **Assignee's** have restricted access to edit tasks

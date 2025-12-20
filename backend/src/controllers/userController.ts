@@ -1,37 +1,36 @@
-import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../lib/prisma';
+import { Request, Response, NextFunction } from "express";
+import { prisma } from "../lib/prisma";
 
-export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+export const getProfile = async (   // get current logged in user details
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const user = (req as any).user;
-    res.status(200).json({ user: { id: user.id, name: user.name, email: user.email } });
+    res
+      .status(200)
+      .json({ user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     next(err);
   }
 };
 
-export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = (req as any).user;
-    const { name, email } = req.body;
-
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: { name, email },
-    });
-
-    res.status(200).json({ user: { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email } });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const searchUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const searchUsers = async (   // searches available users to assign tasks
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { search } = req.query;
 
     if (!search || typeof search !== "string" || search.trim().length < 2) {
-      return res.status(400).json({ users: [], message: "Search query must be at least 2 characters" });
+      return res
+        .status(400)
+        .json({
+          users: [],
+          message: "Search query must be at least 2 characters",
+        });
     }
 
     const users = await prisma.user.findMany({

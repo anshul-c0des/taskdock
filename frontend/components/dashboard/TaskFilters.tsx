@@ -1,24 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { 
-  ArrowUpDown, 
-  CircleDot, 
+import {
+  ArrowUpDown,
+  CircleDot,
   ShieldAlert,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,17 +27,12 @@ interface Props {
 }
 
 export function TaskFilters({ onChange }: Props) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);   // open state, for collapsibe in smaller devices
 
   return (
     <div className="w-full px-4 mb-6">
-      <Collapsible
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        className="w-full"
-      >
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-
           <CollapsibleTrigger asChild>
             <div className="flex items-center gap-2 cursor-pointer sm:cursor-default w-fit">
               <div className="flex items-center gap-2">
@@ -47,10 +42,12 @@ export function TaskFilters({ onChange }: Props) {
                 </span>
               </div>
 
-              <ChevronDown className={cn(
-                "h-4 w-4 text-slate-400 transition-transform duration-300 sm:hidden",
-                isOpen ? "rotate-180" : ""
-              )} />
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-slate-400 transition-transform duration-300 sm:hidden",
+                  isOpen ? "rotate-180" : ""
+                )}
+              />
             </div>
           </CollapsibleTrigger>
 
@@ -76,7 +73,9 @@ function FilterBar({ onChange }: { onChange: (filters: any) => void }) {
         <SelectTrigger className="w-full sm:w-[145px] h-9 border-none bg-transparent hover:bg-white/60 rounded-xl focus:ring-0 focus:ring-offset-0 transition-all shadow-none px-4 text-slate-600">
           <div className="flex items-center gap-2.5">
             <CircleDot className="w-3.5 h-3.5 text-[#6366F1]" />
-            <span className="text-sm font-medium"><SelectValue placeholder="Status" /></span>
+            <span className="text-sm font-medium">
+              <SelectValue placeholder="Status" />
+            </span>
           </div>
         </SelectTrigger>
         <SelectContent className="rounded-xl border-slate-200 shadow-xl">
@@ -93,7 +92,9 @@ function FilterBar({ onChange }: { onChange: (filters: any) => void }) {
         <SelectTrigger className="w-full sm:w-[145px] h-9 border-none bg-transparent hover:bg-white/60 rounded-xl focus:ring-0 focus:ring-offset-0 transition-all shadow-none px-4 text-slate-600">
           <div className="flex items-center gap-2.5">
             <ShieldAlert className="w-3.5 h-3.5 text-[#6366F1]" />
-            <span className="text-sm font-medium"><SelectValue placeholder="Priority" /></span>
+            <span className="text-sm font-medium">
+              <SelectValue placeholder="Priority" />
+            </span>
           </div>
         </SelectTrigger>
         <SelectContent className="rounded-xl border-slate-200 shadow-xl">
@@ -111,7 +112,9 @@ function FilterBar({ onChange }: { onChange: (filters: any) => void }) {
         <SelectTrigger className="w-full sm:w-[135px] h-9 border-none bg-transparent hover:bg-white/60 rounded-xl focus:ring-0 focus:ring-offset-0 transition-all shadow-none px-4 text-slate-600">
           <div className="flex items-center gap-2.5">
             <ArrowUpDown className="w-3.5 h-3.5 text-[#6366F1]" />
-            <span className="text-sm font-medium"><SelectValue placeholder="Sort" /></span>
+            <span className="text-sm font-medium">
+              <SelectValue placeholder="Sort" />
+            </span>
           </div>
         </SelectTrigger>
         <SelectContent className="rounded-xl border-slate-200 shadow-xl">

@@ -11,21 +11,21 @@ import {
 } from "@/lib/taskApi";
 import toast from "react-hot-toast";
 
-export function useTasks() {
+export function useTasks() {   // fetches all tasks
   return useQuery<Task[]>({
     queryKey: ["tasks"],
     queryFn: fetchTasks,
   });
 }
 
-export function useTask(taskId: string) {
+export function useTask(taskId: string) {   // fetches specefic task
   return useQuery<Task>({
     queryKey: ["tasks", taskId],
     queryFn: () => fetchTask(taskId),
   });
 }
 
-export function useCreateTask() {
+export function useCreateTask() {   // create a new task
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -42,7 +42,8 @@ export function useCreateTask() {
       return { previous };
     },
     onError: (_err, _variables, context: any) => {
-      if (context?.previous) queryClient.setQueryData(["tasks"], context.previous);
+      if (context?.previous)
+        queryClient.setQueryData(["tasks"], context.previous);
       toast.error("Failed to create task");
     },
     onSuccess: (createdTask) => {
@@ -54,7 +55,7 @@ export function useCreateTask() {
   });
 }
 
-export function useUpdateTask() {
+export function useUpdateTask() {   // update a task
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -68,7 +69,12 @@ export function useUpdateTask() {
       queryClient.setQueryData<Task[]>(["tasks"], (old) =>
         old?.map((task) =>
           task.id === taskId
-            ? { ...task, ...Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined)) }
+            ? {
+                ...task,
+                ...Object.fromEntries(
+                  Object.entries(data).filter(([_, v]) => v !== undefined)
+                ),
+              }
             : task
         )
       );
@@ -76,14 +82,15 @@ export function useUpdateTask() {
       return { previous };
     },
     onError: (_err, _variables, context: any) => {
-      if (context?.previous) queryClient.setQueryData(["tasks"], context.previous);
+      if (context?.previous)
+        queryClient.setQueryData(["tasks"], context.previous);
       toast.error("Update failed");
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 }
 
-export function useDeleteTask() {
+export function useDeleteTask() {   // delte task
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -92,12 +99,15 @@ export function useDeleteTask() {
       await queryClient.cancelQueries({ queryKey: ["tasks"] });
       const previous = queryClient.getQueryData<Task[]>(["tasks"]);
 
-      queryClient.setQueryData<Task[]>(["tasks"], (old) => old?.filter((t) => t.id !== taskId));
+      queryClient.setQueryData<Task[]>(["tasks"], (old) =>
+        old?.filter((t) => t.id !== taskId)
+      );
 
       return { previous };
     },
     onError: (_err, _variables, context: any) => {
-      if (context?.previous) queryClient.setQueryData(["tasks"], context.previous);
+      if (context?.previous)
+        queryClient.setQueryData(["tasks"], context.previous);
       toast.error("Delete failed");
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),

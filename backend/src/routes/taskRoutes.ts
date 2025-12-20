@@ -1,5 +1,7 @@
-import { Router } from 'express';
-import { requireAuth } from '../middlewares/authMiddleware';
+import { Router } from "express";
+import { requireAuth } from "../middlewares/authMiddleware";
+import { validate } from "../utils/validate";
+import { createTaskSchema, updateTaskSchema } from "../schemas/taskSchema";
 import {
   createTask,
   getTasks,
@@ -7,17 +9,17 @@ import {
   updateTask,
   deleteTask,
   assignTaskController,
-} from '../controllers/taskController';
+} from "../controllers/taskController";
 
 const router = Router();
 
-router.use(requireAuth);
+router.use(requireAuth);   // protected route, jwt token verification
 
-router.post('/', createTask);
-router.get('/', requireAuth, getTasks);
-router.get('/:id', requireAuth, getTaskById);
-router.patch('/:id', requireAuth, updateTask);
-router.delete('/:id', requireAuth, deleteTask);
-router.put('/:taskId/assign', assignTaskController);
+router.post("/", validate(createTaskSchema), createTask);   // create a new task with validated task schema
+router.get("/", getTasks);   // get all tasks associated with current user
+router.get("/:id", getTaskById);   // get a specific task by id
+router.patch("/:id", validate(updateTaskSchema), updateTask);   // updates a task
+router.delete("/:id", deleteTask);   // delete a task
+router.put("/:taskId/assign", assignTaskController);   // assign a task to other user (used by taskService for tests)
 
 export default router;

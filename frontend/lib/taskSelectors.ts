@@ -1,6 +1,6 @@
 import { Task } from "@/lib/taskApi";
 
-export function selectTasks({
+export function selectTasks({   // filters tasks based on dashboard filters
   tasks,
   tab,
   userId,
@@ -24,9 +24,7 @@ export function selectTasks({
   if (tab === "overdue") {
     const now = new Date();
     result = result.filter(
-      (t) =>
-        new Date(t.dueDate) < now &&
-        t.status !== "COMPLETED"
+      (t) => new Date(t.dueDate) < now && t.status !== "COMPLETED"
     );
   }
 
@@ -40,13 +38,15 @@ export function selectTasks({
 
   if (filters.sort === "due_asc") {
     result.sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
   }
 
   if (filters.sort === "due_desc") {
     result.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 

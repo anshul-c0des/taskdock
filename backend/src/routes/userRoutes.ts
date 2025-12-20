@@ -1,11 +1,10 @@
-import { Router } from 'express';
-import { getProfile, searchUsers, updateProfile } from '../controllers/userController';
-import { requireAuth } from '../middlewares/authMiddleware';
+import { Router } from "express";
+import { getProfile, searchUsers } from "../controllers/userController";
+import { requireAuth } from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.get('/', searchUsers);
-router.get('/me', requireAuth, getProfile);
-router.put('/me', requireAuth, updateProfile);
+router.get("/", searchUsers);   // search users to assign
+router.get("/me", requireAuth, getProfile);   // current logged in user details
 
 export default router;

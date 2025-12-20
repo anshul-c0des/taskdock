@@ -13,7 +13,7 @@ export interface TaskUpdateInput {
   title?: string;
   description?: string;
   dueDate?: string;
-  priority?:"LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   status?: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   assignedToId?: string;
 }

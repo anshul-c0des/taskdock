@@ -15,16 +15,18 @@ import toast from "react-hot-toast";
 
 export default function TaskDetailsPage() {
   const params = useParams();
-  const taskId = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId;
+  const taskId = Array.isArray(params.taskId)   // current task id to fetch task details
+    ? params.taskId[0]
+    : params.taskId;
 
-  const { user } = useAuth();
+  const { user } = useAuth();   // curernt user
   const router = useRouter();
-  
+
   const { data: task, isLoading, isError, refetch } = useTask(taskId!);
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
 
-  useEffect(() => {
+  useEffect(() => {   // socket init for noti
     const socket = getSocket();
     socket.on("task:updated", (updatedTask: Task) => {
       if (updatedTask.id === taskId) refetch();
@@ -32,10 +34,10 @@ export default function TaskDetailsPage() {
 
     return () => {
       socket.off("task:updated");
-    }; 
+    };
   }, [taskId, refetch]);
 
-  const handleUpdate = (data: TaskFormValues) => {
+  const handleUpdate = (data: TaskFormValues) => {   // update a task
     const updateData: TaskUpdateInput = {
       title: data.title,
       description: data.description,
@@ -44,27 +46,27 @@ export default function TaskDetailsPage() {
       status: data.status,
       assignedToId: data.assignedToId,
     };
-  
+
     updateTaskMutation.mutate(
       { taskId: task!.id, data: updateData },
       {
         onSuccess: () => {
-          router.push("/dashboard?tab=created");
+          router.push("/dashboard?tab=created");   // redirect to created tab, as created tasks can be updated
           toast.success("Task updated successfully!");
         },
-        onError: () => toast.error("Failed to update task")
+        onError: () => toast.error("Failed to update task"),
       }
     );
   };
-  
-  const handleDelete = () => {
+
+  const handleDelete = () => {   // deletes a task
     if (!taskId) return;
     router.push("/dashboard?tab=created");
     deleteTaskMutation.mutate(taskId, {
       onSuccess: () => {
         toast.success("Task deleted");
       },
-      onError: () => toast.error("Failed to delete task")
+      onError: () => toast.error("Failed to delete task"),
     });
   };
 
@@ -72,7 +74,9 @@ export default function TaskDetailsPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
-        <p className="text-slate-500 text-sm font-medium">Fetching task details...</p>
+        <p className="text-slate-500 text-sm font-medium">
+          Fetching task details...
+        </p>
       </div>
     );
   }
@@ -82,7 +86,9 @@ export default function TaskDetailsPage() {
       <div className="max-w-xl mx-auto mt-10 p-8 border-2 border-dashed border-slate-200 rounded-2xl text-center">
         <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-4" />
         <h3 className="text-lg font-bold text-slate-900">Task not found</h3>
-        <p className="text-slate-500 mb-6">This task may have been deleted or moved.</p>
+        <p className="text-slate-500 mb-6">
+          This task may have been deleted or moved.
+        </p>
         <Button onClick={() => router.push("/dashboard")} variant="outline">
           Back to Dashboard
         </Button>
@@ -92,7 +98,7 @@ export default function TaskDetailsPage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-6 sm:py-10">
-      <button 
+      <button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors mb-6 group"
       >
@@ -106,11 +112,16 @@ export default function TaskDetailsPage() {
             Task Details
           </CardTitle>
           <p className="text-sm text-slate-500">
-            {task.createdById === user?.id && (
-              "View or modify parameters for this task."
-            )}
+            {task.createdById === user?.id &&
+              "View or modify parameters for this task."}
             {task.assignedToId === user?.id && (
-              <p>View or modify <span className="text-slate-700 font-semibold">priority and status</span> for this task.</p>
+              <p>
+                View or modify{" "}
+                <span className="text-slate-700 font-semibold">
+                  priority and status
+                </span>{" "}
+                for this task.
+              </p>
             )}
           </p>
         </CardHeader>

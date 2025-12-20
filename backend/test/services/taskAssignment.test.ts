@@ -7,21 +7,19 @@ describe("Task Assignment", () => {
   let creator: any;
   let assignee: any;
 
-  beforeAll(async () => {
-    // safely create unique test users
+  beforeAll(async () => {   // creates two users
     creator = await createUser();
     assignee = await createUser();
   });
 
   afterAll(async () => {
-    // clean up only test data
-    await cleanupTestData();
+    await cleanupTestData();   // clean up test data
   });
 
   it("assigns a task to a user", async () => {
-    const task = await createTask({ createdById: creator.id });
+    const task = await createTask({ createdById: creator.id });   // create a new task
 
-    const updated = await taskService.assignTask(task.id, assignee.id);
+    const updated = await taskService.assignTask(task.id, assignee.id);   // assign task to other user
 
     expect(updated.assignedToId).toBe(assignee.id);
   }, 10000);

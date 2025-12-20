@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Plus, ListTodo, User, LayoutDashboard } from "lucide-react";
+import { Plus, User, LayoutDashboard } from "lucide-react";
 
-export default function MobileNav() {
+export default function MobileNav() {   // Bottom Mobile-only navigation menu
   const pathname = usePathname();
 
   const navItems = [
@@ -18,7 +18,7 @@ export default function MobileNav() {
       label: "Create",
       href: "/tasks/create",
       icon: Plus,
-      isPrimary: true, // Special styling for the center button
+      isPrimary: true,
     },
     {
       label: "Profile",
@@ -34,7 +34,7 @@ export default function MobileNav() {
           {navItems.map(({ href, icon: Icon, label, isPrimary }) => {
             const active = pathname === href;
 
-            if (isPrimary) {
+            if (isPrimary) {   // styling for create task button
               return (
                 <li key={href} className="relative -top-4">
                   <Link

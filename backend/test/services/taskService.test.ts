@@ -7,20 +7,18 @@ describe("Task Service", () => {
   let user: any;
 
   beforeAll(async () => {
-    // create a unique test user
-    user = await createUser();
+    user = await createUser();   // create a test user
   });
 
   afterAll(async () => {
-    // safely remove only test data
-    await cleanupTestData();
+    await cleanupTestData();   // clean up test data
   });
 
   it("creates a task with valid data", async () => {
-    const task = await taskService.createTask({
+    const task = await taskService.createTask({   // create a new task in db
       title: "New Task",
       dueDate: new Date(),
-      createdById: user.id, // use test user
+      createdById: user.id,
     });
 
     expect(task).toHaveProperty("id");

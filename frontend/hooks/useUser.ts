@@ -9,11 +9,11 @@ interface User {
 }
 
 export const useUserSearch = (query: string) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);   // matching users
+  const [loading, setLoading] = useState(false);   // loading state
 
   useEffect(() => {
-    if (query.length < 2) {
+    if (query.length < 2) {   // min chars to fetch user
       setUsers([]);
       return;
     }

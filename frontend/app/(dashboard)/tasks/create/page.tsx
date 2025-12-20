@@ -11,46 +11,47 @@ import { TaskForm } from "@/components/tasks/TaskForm";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function CreateTaskPage() {
-  const { user, isInitializing } = useAuth();
+  const { user, isInitializing } = useAuth();   // user and user initialising
   const router = useRouter();
-  const createTaskMutation = useCreateTask();
+  const createTaskMutation = useCreateTask();   // create new task fom react query
 
-  useEffect(() => {
+  useEffect(() => {   // fetch user
     if (!user && !isInitializing) {
       router.push("/auth/login");
     }
   }, [user, isInitializing, router]);
 
-  const onSubmit = (data: TaskFormValues) => {
+  const onSubmit = (data: TaskFormValues) => {   // create a new task
     const payload = {
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : "",
     };
 
-    router.push("/dashboard?tab=created");
+    router.push("/dashboard?tab=created");   // redirect to dashboard
     createTaskMutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: () => {   // toast after server resp
         toast.success("Task created successfully!");
-      }, 
+      },
       onError: (error: any) => {
-        const message = error?.response?.data?.message || "Failed to create task.";
+        const message =
+          error?.response?.data?.message || "Failed to create task.";
         toast.error(message);
       },
     });
   };
 
-  if (isInitializing) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
-          <p className="text-slate-500 text-sm font-medium">Just a sec...</p>
-        </div>
-      );
-    }
+  if (isInitializing) {   // page loading spinner
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-9 h-9 animate-spin text-indigo-500" />
+        <p className="text-slate-500 text-sm font-medium">Just a sec...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-6 sm:py-10">
-       <button 
+      <button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors mb-6 group"
       >
@@ -66,11 +67,11 @@ export default function CreateTaskPage() {
             Assign tasks to team members and set clear deadlines.
           </p>
         </CardHeader>
-        
+
         <CardContent className="px-8 pb-8 pt-4">
-          <TaskForm 
-            onSubmit={onSubmit} 
-            submitLabel="Create Task" 
+          <TaskForm
+            onSubmit={onSubmit}
+            submitLabel="Create Task"
             isSubmitting={createTaskMutation.isPending}
             currentUserId={user?.id}
             taskMeta={{ createdById: user?.id || "" }}

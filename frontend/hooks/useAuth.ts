@@ -1,6 +1,6 @@
-"use client"
-import { useEffect, useState } from 'react';
-import { api } from '../lib/api';
+"use client";
+import { useEffect, useState } from "react";
+import { api } from "../lib/api";
 
 interface User {
   id: string;
@@ -9,15 +9,15 @@ interface User {
 }
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [user, setUser] = useState<User | null>(null);   // current user
+  const [loading, setLoading] = useState(false);   // loading state
+  const [error, setError] = useState<string | null>(null);   // error state
+  const [isInitializing, setIsInitializing] = useState(true);   // init state for user fetch
 
-  useEffect(() => {
+  useEffect(() => {   // fetch user on mount
     const fetchUser = async () => {
       try {
-        const res = await api.get('/users/me');
+        const res = await api.get("/users/me");
         setUser(res.data.user);
       } catch {
         setUser(null);
@@ -27,46 +27,57 @@ export const useAuth = () => {
     };
     fetchUser();
   }, []);
-  
 
-  const registerUser = async (data: { name: string; email: string; password: string }) => {
+  const registerUser = async (data: {   // register a new user
+    name: string;
+    email: string;
+    password: string;
+  }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/auth/register', data);
-      setUser(res.data.user); 
+      const res = await api.post("/auth/register", data);
+      setUser(res.data.user);   // set uer 
       return res.data;
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
-  
-  const loginUser = async (data: { email: string; password: string }) => {
+
+  const loginUser = async (data: { email: string; password: string }) => {   // log in user
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/auth/login', data);
-      setUser(res.data.user); 
+      const res = await api.post("/auth/login", data);
+      setUser(res.data.user);   // set user
       return res.data;
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
       throw new Error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const logoutUser = async () => {
+  const logoutUser = async () => {   // logout user
     try {
-      await api.post('/auth/logout');
+      await api.post("/auth/logout");
     } catch (err) {
-      console.warn('Logout failed', err);
+      console.warn("Logout failed", err);
     } finally {
       setUser(null);
     }
   };
 
-  return { user, registerUser, loginUser, logoutUser, loading, error, isInitializing };
+  return {
+    user,
+    registerUser,
+    loginUser,
+    logoutUser,
+    loading,
+    error,
+    isInitializing,
+  };
 };

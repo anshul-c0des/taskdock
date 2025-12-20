@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { Plus, LogOut, User, LayoutDashboard, Bell } from "lucide-react";
+import { Plus, LogOut, User, LayoutDashboard, Bell, Loader2 } from "lucide-react";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { getSocket } from "@/lib/socket";
 
@@ -29,15 +29,16 @@ type Notification = {
 };
 
 export default function Header() {
-  const { user, logoutUser } = useAuth();
-  const firstLetter = user?.name?.[0]?.toUpperCase() ?? "U";
+  const { user, logoutUser } = useAuth();   // get current user and logout current user from useAuth hook
+  const firstLetter = user?.name?.[0]?.toUpperCase() ?? "U";   // first letter of current user name
+
   const router = useRouter();
   const pathname = usePathname();
-  const isDashboard = pathname === "/dashboard";
+  const isDashboard = pathname === "/dashboard";   // for tabs
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);   // for notifications
 
-  const addNotification = (
+  const addNotification = (   // adds a new notification
     notification: Omit<Notification, "id" | "timestamp" | "read">
   ) => {
     setNotifications((prev) => {
@@ -51,11 +52,11 @@ export default function Header() {
     });
   };
 
-  const markAllRead = () => {
+  const markAllRead = () => {   // marks all notification as read
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  useEffect(() => {
+  useEffect(() => {   // socket init for current user
     const socket = getSocket();
     if (!socket || !user) return;
 
@@ -86,7 +87,7 @@ export default function Header() {
     };
   }, [user]);
 
-  const handleLogout = async () => {
+  const handleLogout = async () => {   // logs out current user
     router.push("/");
     await logoutUser();
     toast.success("Logged out successfully");
@@ -96,6 +97,8 @@ export default function Header() {
     <>
       <header className="relative md:sticky top-0 z-50 w-full bg-white md:bg-white/90 md:backdrop-blur-md border-b border-slate-200">
         <div className="h-16 px-4 md:px-12 lg:px-20 max-w-[1440px] mx-auto flex items-center justify-between gap-3">
+
+          {/* LHS */}
           <Link href="/dashboard" className="flex items-center gap-3 shrink-0">
             <div className="bg-[#6366F1] p-2 rounded-xl shadow-lg shadow-indigo-100">
               <LayoutDashboard className="w-5 h-5 text-white" />
@@ -105,12 +108,14 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* MID- shows tabs in header for large screens */}
           {isDashboard && (
             <div className="hidden md:flex flex-1 justify-center max-w-md mx-auto -mt-4">
               <DashboardTabs />
             </div>
           )}
 
+          {/* Notifications Bell */}
           <div className="flex items-center gap-3 shrink-0">
             <DropdownMenu onOpenChange={(open) => open && markAllRead()}>
               <DropdownMenuTrigger asChild>
@@ -202,6 +207,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Create Task Button hidden on smaller devices */}
             <Link href="/tasks/create" className="hidden md:block">
               <Button className="bg-indigo-100/50 hover:bg-primary cursor-pointer hover:text-white text-primary rounded-xl px-5 h-10 text-md font-semibold transition-all">
                 <Plus className="w-5 h-5" />
@@ -209,11 +215,12 @@ export default function Header() {
               </Button>
             </Link>
 
+            {/* User Avatarr */}
             <DropdownMenu>
               <DropdownMenuTrigger className="outline-none">
                 <Avatar className="h-9 w-9 cursor-pointer md:h-10 md:w-10 border border-slate-200 hover:border-indigo-300 transition-colors">
                   <AvatarFallback className="bg-indigo-50 text-[#6366F1] font-bold">
-                    {firstLetter}
+                    {firstLetter === "U" ? <Loader2 className="w-5 h-5 animate-spin text-indigo-500" /> : firstLetter}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -252,6 +259,7 @@ export default function Header() {
         </div>
       </header>
 
+      {/* Tabs for smaller devices */}
       {isDashboard && (
         <div className="md:hidden w-full border-b border-slate-100 px-4 pt-1">
           <DashboardTabs />
