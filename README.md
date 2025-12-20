@@ -167,13 +167,13 @@ npm run test
 | GET    | /tasks/:id                 | None                                               | Get a task by ID                          |
 | PATCH  | /tasks/:id                 | `{ title?, description?, status?, priority?, dueDate?, assignedToId? }` | Update a task (creator or assignee)      |
 | DELETE | /tasks/:id                 | None                                               | Delete a task (creator only)             |
-| PUT    | /tasks/:taskId/assign      | `{ assignedToId }`                                 | Assign a task to a user                  |
+| PUT    | /tasks/:taskId/assign      | `{ assignedToId }`                                 | Assign a task to a user (for testing)                  |
 
 
 ## Architecture Overview & Design Decisions 🏗️
 
 - **Authentication:** **JWT** stored in **HttpOnly cookies** for better security.`requireAuth` middleware protects routes.
-- **Task Ownership:** Only **creators** can fully update tasks.**Assignees** can update only **status** and **priority**.
+- **Task Ownership:** Only **creators** can fully update or delete tasks.**Assignees** can update only **status** and **priority**.
 - **Database Choice:** **Supabase (PostgreSQL)** provides a scalable relational database with Prisma integration.
 - **Validation:** Request bodies are validated using **Zod**.
 
@@ -188,7 +188,8 @@ npm run test
 
 ## Trade-offs & Assumptions
 - JWTs are stored in cookies for security, **not localStorage**.  
-- Only **task creators or assignees** can edit tasks.  
-- Socket.io events assume users are **connected and joined rooms** based on user ID.  
+- **Task creators** can edit all parameters of that task.
+- **Assignee's** have restricted access to edit tasks.
+- Socket.io events assume users are **connected and joined rooms** based on user ID.
+- Notifications does not persist upon page refresh (Client only).  
 - Minimal search results for users (**max 10**) to reduce payload.
-- **Assignee's** have restricted access to edit tasks

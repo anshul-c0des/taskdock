@@ -158,7 +158,8 @@ export function TaskForm({
               }
               onChange={(date: Date | null) => {
                 if (date) {
-                  form.setValue("dueDate", date.toISOString().split("T")[0]);
+                  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                  form.setValue("dueDate", localDate.toISOString().split("T")[0]);
                 } else {
                   form.setValue("dueDate", "");
                 }
