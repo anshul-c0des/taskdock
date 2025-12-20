@@ -1,23 +1,39 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token"); // JWT set by backend
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow public paths
-  if (pathname.startsWith("/auth") || pathname === "/") {
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/auth")
+  ) {
     return NextResponse.next();
   }
 
-  // Redirect to login if token is missing
-  if (!token) {
+  try {
+    // Ask backend if user is authenticated
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
+      {
+        headers: {
+          cookie: req.headers.get("cookie") || "",
+        },
+        credentials: "include",
+      }
+    );
+    if (!res.ok) {
+      throw new Error("Unauthorized");
+    }
+
+    return NextResponse.next();
+  } catch {
+    // Not authenticated → redirect before page renders
     const loginUrl = new URL("/auth/login", req.url);
     return NextResponse.redirect(loginUrl);
   }
-  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/tasks/:path*"], // protect dashboard & task pages
+  matcher: ["/dashboard/:path*", "/tasks/:path*"],
 };
